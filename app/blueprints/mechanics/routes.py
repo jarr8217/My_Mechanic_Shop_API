@@ -31,15 +31,15 @@ def get_mechanics():
     return jsonify(mechanics_schema.dump(mechanics)), 200
 
 #Get a mechanic by ID
-@mechanics_bp.route('/', methods=['GET'])
+@mechanics_bp.route('/<int:mechanic_id>', methods=['GET'])
 def get_mechanic_by_id(mechanic_id):
-    mechanic = select(Mechanic, mechanic_id)
+    mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:
         return jsonify({'error': 'Mechanic not found'}), 404
     return jsonify(mechanic_schema.dump(mechanic)), 200
 
 #Update a mechanic
-@mechanics_bp.route('/', methods=['PUT'])
+@mechanics_bp.route('/<int:mechanic_id>', methods=['PUT'])
 def update_mechanic(mechanic_id):
     mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:
@@ -55,8 +55,23 @@ def update_mechanic(mechanic_id):
     db.session.commit()
     return jsonify(mechanic_schema.dump(mechanic)), 200
 
+#Partial update a mechanic
+@mechanics_bp.route('/<int:mechanic_id>', methods=['PATCH'])
+def partial_update_mechanic(mechanic_id):
+    mechanic = db.session.get(Mechanic, mechanic_id)
+    if not mechanic:
+        return jsonify({'error': 'Mechanic not found'}), 404
+    try:
+        mechanic_data = mechanic_schema.load(request.json, partial=True)
+    except ValidationError as e:
+        return jsonify(e.messages), 400
+    for key, value in mechanic_data.items():
+        setattr(mechanic, key, value)
+    db.session.commit()
+    return jsonify(mechanic_schema.dump(mechanic)), 200
+
 #Delete a mechanic
-@mechanics_bp.route('/', methods=['DELETE'])
+@mechanics_bp.route('/<int:mechanic_id>', methods=['DELETE'])
 def delete_mechanic(mechanic_id):
     mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:
