@@ -5,6 +5,7 @@ from sqlalchemy import select
 from app.models import Customer, db
 from . import customers_bp
 
+# Create a new customer
 @customers_bp.route('/', methods=['POST'])
 def create_customer():
     try:
@@ -23,8 +24,6 @@ def create_customer():
     return customer_schema.jsonify(new_customer), 201
 
 # Get all customers
-
-
 @customers_bp.route('/', methods=['GET'])
 def get_customers():
     query = select(Customer)
