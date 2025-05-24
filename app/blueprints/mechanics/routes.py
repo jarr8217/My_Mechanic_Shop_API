@@ -1,5 +1,5 @@
 from .schemas import mechanic_schema, mechanics_schema
-from flask import request, jsonify, Blueprint
+from flask import request, jsonify
 from marshmallow import ValidationError
 from sqlalchemy import select
 from app.models import Mechanic, db
