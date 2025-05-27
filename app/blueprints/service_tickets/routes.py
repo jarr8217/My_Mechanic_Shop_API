@@ -39,8 +39,8 @@ def create_service_ticket(customer_id):
 @limiter.limit('10 per minute; 200 per day')
 @cache.cached(timeout=30)
 @token_required
-def get_service_tickets():
-    query = select(Service_Ticket)
+def get_service_tickets(customer_id):
+    query = select(Service_Ticket).where(Service_Ticket.customer_id == customer_id)
     service_tickets = db.session.execute(query).scalars().all()
     return jsonify(service_tickets_schema.dump(service_tickets)), 200
 
@@ -49,7 +49,7 @@ def get_service_tickets():
 @limiter.limit('10 per minute; 200 per day')
 @cache.cached(timeout=30)
 @token_required
-def get_service_ticket_by_id(ticket_id):
+def get_service_ticket_by_id(customer_id, ticket_id):
     ticket = db.session.get(Service_Ticket, ticket_id)
     if not ticket:
         return jsonify({'error': 'Are you sure this ticket exists?'}), 404
@@ -103,7 +103,7 @@ def remove_mechanic_from_ticket(ticket_id, mechanic_id):
 @limiter.limit('10 per minute; 200 per day')
 @cache.cached(timeout=30)
 @token_required
-def get_service_ticket(ticket_id):
+def get_service_ticket(customer_id,ticket_id):
     service_ticket = db.session.get(Service_Ticket, ticket_id)
     if not service_ticket:
         return jsonify({'error': 'Service ticket not found'}), 404

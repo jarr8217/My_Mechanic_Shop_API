@@ -27,7 +27,7 @@ def create_mechanic():
     return jsonify(mechanic_schema.dump(new_mechanic)), 201
 
 #Get all mechanics
-@mechanics_bp.route('/', methods=['GET'])
+@mechanics_bp.route('/mechanics/', methods=['GET'])
 @limiter.limit('10 per minute; 200 per day')
 @cache.cached(timeout=30)
 @token_required
@@ -48,7 +48,7 @@ def get_mechanic_by_id(mechanic_id):
     return jsonify(mechanic_schema.dump(mechanic)), 200
 
 #Update a mechanic
-@mechanics_bp.route('/<int:mechanic_id>', methods=['PUT'])
+@mechanics_bp.route('/mechanics/<int:mechanic_id>', methods=['PUT'])
 @limiter.limit('5 per minute; 50 per day')
 @token_required
 def update_mechanic(mechanic_id):
@@ -67,7 +67,7 @@ def update_mechanic(mechanic_id):
     return jsonify(mechanic_schema.dump(mechanic)), 200
 
 #Partial update a mechanic
-@mechanics_bp.route('/<int:mechanic_id>', methods=['PATCH'])
+@mechanics_bp.route('/mechanics/<int:mechanic_id>', methods=['PATCH'])
 @limiter.limit('5 per minute; 50 per day')
 @token_required
 def partial_update_mechanic(mechanic_id):
@@ -84,7 +84,7 @@ def partial_update_mechanic(mechanic_id):
     return jsonify(mechanic_schema.dump(mechanic)), 200
 
 #Delete a mechanic
-@mechanics_bp.route('/<int:mechanic_id>', methods=['DELETE'])
+@mechanics_bp.route('/mechanics/<int:mechanic_id>', methods=['DELETE'])
 @limiter.limit('5 per minute; 50 per day')
 @token_required
 def delete_mechanic(mechanic_id):
