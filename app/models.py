@@ -25,6 +25,7 @@ class Customer(Base):
     name: Mapped[str] = mapped_column(db.String(255), nullable=False)
     email: Mapped[str] = mapped_column(db.String(360), unique=True, nullable=False)
     phone: Mapped[str] = mapped_column(db.String(50), nullable=False)
+    password: Mapped[str] = mapped_column(db.String(255), nullable=False)
 
     service_tickets: Mapped[List['Service_Ticket']] = db.relationship(back_populates='customer')
 
