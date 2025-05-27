@@ -1,3 +1,4 @@
+from app.utils.decorators import token_required
 from .schemas import mechanic_schema, mechanics_schema
 from flask import request, jsonify
 from marshmallow import ValidationError
@@ -29,6 +30,7 @@ def create_mechanic():
 @mechanics_bp.route('/', methods=['GET'])
 @limiter.limit('10 per minute; 200 per day')
 @cache.cached(timeout=30)
+@token_required
 def get_mechanics():
     query = select(Mechanic)
     mechanics = db.session.execute(query).scalars().all()
@@ -38,6 +40,7 @@ def get_mechanics():
 @mechanics_bp.route('/<int:mechanic_id>', methods=['GET'])
 @limiter.limit('10 per minute; 200 per day')
 @cache.cached(timeout=30)
+@token_required
 def get_mechanic_by_id(mechanic_id):
     mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:
@@ -46,6 +49,8 @@ def get_mechanic_by_id(mechanic_id):
 
 #Update a mechanic
 @mechanics_bp.route('/<int:mechanic_id>', methods=['PUT'])
+@limiter.limit('5 per minute; 50 per day')
+@token_required
 def update_mechanic(mechanic_id):
     mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:
@@ -64,6 +69,7 @@ def update_mechanic(mechanic_id):
 #Partial update a mechanic
 @mechanics_bp.route('/<int:mechanic_id>', methods=['PATCH'])
 @limiter.limit('5 per minute; 50 per day')
+@token_required
 def partial_update_mechanic(mechanic_id):
     mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:
@@ -80,6 +86,7 @@ def partial_update_mechanic(mechanic_id):
 #Delete a mechanic
 @mechanics_bp.route('/<int:mechanic_id>', methods=['DELETE'])
 @limiter.limit('5 per minute; 50 per day')
+@token_required
 def delete_mechanic(mechanic_id):
     mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:

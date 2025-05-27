@@ -1,3 +1,4 @@
+from app.utils.decorators import token_required
 from .schemas import service_ticket_schema, service_tickets_schema
 from flask import request, jsonify
 from marshmallow import ValidationError
@@ -11,13 +12,15 @@ from app.extensions import limiter, cache
 #Create service_ticket
 @service_tickets_bp.route('/', methods=['POST'])
 @limiter.limit("5 per minute; 50 per day")
-def create_service_ticket():
+@token_required
+def create_service_ticket(customer_id):
     try:
-        service_ticket = service_ticket_schema.load(request.json)
+        ticket_data = request.json
+        ticket_data['customer_id'] = customer_id
+        service_ticket = service_ticket_schema.load(ticket_data)
     except ValidationError as e:
         return jsonify(e.messages), 400
 
-    customer_id = service_ticket.customer_id
     if not customer_id or not db.session.get(Customer, customer_id):
         return jsonify({'error': 'Missing or invalid customer ID'}), 400
 
@@ -35,6 +38,7 @@ def create_service_ticket():
 @service_tickets_bp.route('/', methods=['GET'])
 @limiter.limit('10 per minute; 200 per day')
 @cache.cached(timeout=30)
+@token_required
 def get_service_tickets():
     query = select(Service_Ticket)
     service_tickets = db.session.execute(query).scalars().all()
@@ -44,6 +48,7 @@ def get_service_tickets():
 @service_tickets_bp.route('/<int:ticket_id>', methods=['GET'])
 @limiter.limit('10 per minute; 200 per day')
 @cache.cached(timeout=30)
+@token_required
 def get_service_ticket_by_id(ticket_id):
     ticket = db.session.get(Service_Ticket, ticket_id)
     if not ticket:
@@ -54,6 +59,7 @@ def get_service_ticket_by_id(ticket_id):
 # Add mechanic to service_ticket
 @service_tickets_bp.route('/<int:ticket_id>/add_mechanic/<int:mechanic_id>', methods=['PUT'])
 @limiter.limit('5 per minute; 50 per day')
+@token_required
 def add_mechanic_to_ticket(ticket_id, mechanic_id):
     ticket = db.session.get(Service_Ticket, ticket_id)
     mechanic = db.session.get(Mechanic, mechanic_id)
@@ -75,6 +81,7 @@ def add_mechanic_to_ticket(ticket_id, mechanic_id):
 # Remove mechanic from service_ticket
 @service_tickets_bp.route('/<int:ticket_id>/remove_mechanic/<int:mechanic_id>', methods=['PUT'])
 @limiter.limit('5 per minute; 50 per day')
+@token_required
 def remove_mechanic_from_ticket(ticket_id, mechanic_id):
     ticket = db.session.get(Service_Ticket, ticket_id)
     mechanic = db.session.get(Mechanic, mechanic_id)
@@ -95,9 +102,22 @@ def remove_mechanic_from_ticket(ticket_id, mechanic_id):
 @service_tickets_bp.route('/<int:ticket_id>', methods=['GET'])
 @limiter.limit('10 per minute; 200 per day')
 @cache.cached(timeout=30)
+@token_required
 def get_service_ticket(ticket_id):
     service_ticket = db.session.get(Service_Ticket, ticket_id)
     if not service_ticket:
         return jsonify({'error': 'Service ticket not found'}), 404
     return jsonify(service_ticket_schema.dump(service_ticket)), 200
 
+# Get all service tickets for a customer
+@service_tickets_bp.route('/my-tickets', methods=['GET'])
+@limiter.limit('10 per minute; 200 per day')
+@token_required
+def get_customer_service_tickets(customer_id):
+    query = select(Service_Ticket).where(Service_Ticket.customer_id == customer_id)
+    service_ticket = db.session.execute(query).scalars().all()
+
+    if not service_ticket:
+        return jsonify({'message': 'No service tickets found for this customer'}), 404
+    
+    return  jsonify(service_tickets_schema.dump(service_ticket)), 200
