@@ -6,9 +6,11 @@ from app.models import Service_Ticket, db
 from . import service_tickets_bp
 from app.models import Customer
 from app.models import Mechanic
+from app.extensions import limiter, cache
 
 #Create service_ticket
 @service_tickets_bp.route('/', methods=['POST'])
+@limiter.limit("5 per minute; 50 per day")
 def create_service_ticket():
     try:
         service_ticket = service_ticket_schema.load(request.json)
@@ -31,6 +33,8 @@ def create_service_ticket():
 
 #Get all service_tickets
 @service_tickets_bp.route('/', methods=['GET'])
+@limiter.limit('10 per minute; 200 per day')
+@cache.cached(timeout=30)
 def get_service_tickets():
     query = select(Service_Ticket)
     service_tickets = db.session.execute(query).scalars().all()
@@ -38,6 +42,8 @@ def get_service_tickets():
 
 #Get specific service_ticket
 @service_tickets_bp.route('/<int:ticket_id>', methods=['GET'])
+@limiter.limit('10 per minute; 200 per day')
+@cache.cached(timeout=30)
 def get_service_ticket_by_id(ticket_id):
     ticket = db.session.get(Service_Ticket, ticket_id)
     if not ticket:
@@ -47,6 +53,7 @@ def get_service_ticket_by_id(ticket_id):
 
 # Add mechanic to service_ticket
 @service_tickets_bp.route('/<int:ticket_id>/add_mechanic/<int:mechanic_id>', methods=['PUT'])
+@limiter.limit('5 per minute; 50 per day')
 def add_mechanic_to_ticket(ticket_id, mechanic_id):
     ticket = db.session.get(Service_Ticket, ticket_id)
     mechanic = db.session.get(Mechanic, mechanic_id)
@@ -67,6 +74,7 @@ def add_mechanic_to_ticket(ticket_id, mechanic_id):
 
 # Remove mechanic from service_ticket
 @service_tickets_bp.route('/<int:ticket_id>/remove_mechanic/<int:mechanic_id>', methods=['PUT'])
+@limiter.limit('5 per minute; 50 per day')
 def remove_mechanic_from_ticket(ticket_id, mechanic_id):
     ticket = db.session.get(Service_Ticket, ticket_id)
     mechanic = db.session.get(Mechanic, mechanic_id)
@@ -85,6 +93,8 @@ def remove_mechanic_from_ticket(ticket_id, mechanic_id):
 
 # Get service_ticket by id
 @service_tickets_bp.route('/<int:ticket_id>', methods=['GET'])
+@limiter.limit('10 per minute; 200 per day')
+@cache.cached(timeout=30)
 def get_service_ticket(ticket_id):
     service_ticket = db.session.get(Service_Ticket, ticket_id)
     if not service_ticket:

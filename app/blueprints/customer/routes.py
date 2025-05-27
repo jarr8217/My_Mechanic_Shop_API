@@ -4,9 +4,11 @@ from marshmallow import ValidationError
 from sqlalchemy import select
 from app.models import Customer, db
 from . import customers_bp
+from app.extensions import limiter, cache
 
 # Create a new customer
 @customers_bp.route('/', methods=['POST'])
+@limiter.limit("3 per minute; 30 per day")
 def create_customer():
     try:
         customer_data = customer_schema.load(request.json)
@@ -25,6 +27,8 @@ def create_customer():
 
 # Get all customers
 @customers_bp.route('/', methods=['GET'])
+@limiter.limit('10 per minute; 200 per day')
+@cache.cached(timeout=30)
 def get_customers():
     query = select(Customer)
     customers = db.session.execute(query).scalars().all()
@@ -32,6 +36,8 @@ def get_customers():
 
 # Get a customer by ID
 @customers_bp.route('/<int:customer_id>', methods=['GET'])
+@limiter.limit('10 per minute; 200 per day')
+@cache.cached(timeout=60)
 def get_customer(customer_id):
     customer = db.session.get(Customer, customer_id)
     if not customer:
@@ -40,6 +46,7 @@ def get_customer(customer_id):
 
 # Update a customer
 @customers_bp.route('/<int:customer_id>' , methods=['PUT'])
+@limiter.limit('5 per minute; 50 per day')
 def update_customer(customer_id):
     customer = db.session.get(Customer, customer_id)
     if not customer:
@@ -57,6 +64,7 @@ def update_customer(customer_id):
 
 # Partial update a customer
 @customers_bp.route('/<int:customer_id>', methods=['PATCH'])
+@limiter.limit('5 per minute; 50 per day')
 def partial_update_customer(customer_id):
     customer = db.session.get(Customer, customer_id)
     if not customer:
@@ -74,6 +82,7 @@ def partial_update_customer(customer_id):
 
 #Delete a customer
 @customers_bp.route('/<int:customer_id>', methods=['DELETE'])
+@limiter.limit('5 per minute; 50 per day')
 def delete_customer(customer_id):
     customer = db.session.get(Customer, customer_id)
     if not customer:

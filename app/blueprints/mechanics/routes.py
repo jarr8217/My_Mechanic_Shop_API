@@ -4,9 +4,11 @@ from marshmallow import ValidationError
 from sqlalchemy import select
 from app.models import Mechanic, db
 from . import mechanics_bp
+from app.extensions import limiter, cache
 
 # Create a mechanic
 @mechanics_bp.route('/', methods=['POST'])
+@limiter.limit("5 per minute; 50 per day")
 def create_mechanic():
     try:
         mechanic_data = mechanic_schema.load(request.json)
@@ -25,6 +27,8 @@ def create_mechanic():
 
 #Get all mechanics
 @mechanics_bp.route('/', methods=['GET'])
+@limiter.limit('10 per minute; 200 per day')
+@cache.cached(timeout=30)
 def get_mechanics():
     query = select(Mechanic)
     mechanics = db.session.execute(query).scalars().all()
@@ -32,6 +36,8 @@ def get_mechanics():
 
 #Get a mechanic by ID
 @mechanics_bp.route('/<int:mechanic_id>', methods=['GET'])
+@limiter.limit('10 per minute; 200 per day')
+@cache.cached(timeout=30)
 def get_mechanic_by_id(mechanic_id):
     mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:
@@ -57,6 +63,7 @@ def update_mechanic(mechanic_id):
 
 #Partial update a mechanic
 @mechanics_bp.route('/<int:mechanic_id>', methods=['PATCH'])
+@limiter.limit('5 per minute; 50 per day')
 def partial_update_mechanic(mechanic_id):
     mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:
@@ -72,6 +79,7 @@ def partial_update_mechanic(mechanic_id):
 
 #Delete a mechanic
 @mechanics_bp.route('/<int:mechanic_id>', methods=['DELETE'])
+@limiter.limit('5 per minute; 50 per day')
 def delete_mechanic(mechanic_id):
     mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:
