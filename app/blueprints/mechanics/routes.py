@@ -27,11 +27,11 @@ def create_mechanic():
     return jsonify(mechanic_schema.dump(new_mechanic)), 201
 
 #Get all mechanics
-@mechanics_bp.route('/mechanics/', methods=['GET'])
+@mechanics_bp.route('/', methods=['GET'])
 @limiter.limit('10 per minute; 200 per day')
 @cache.cached(timeout=30)
 @token_required
-def get_mechanics():
+def get_mechanics(customer_id):
     query = select(Mechanic)
     mechanics = db.session.execute(query).scalars().all()
     return jsonify(mechanics_schema.dump(mechanics)), 200
@@ -41,17 +41,17 @@ def get_mechanics():
 @limiter.limit('10 per minute; 200 per day')
 @cache.cached(timeout=30)
 @token_required
-def get_mechanic_by_id(mechanic_id):
+def get_mechanic_by_id(current_user_id, mechanic_id):
     mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:
         return jsonify({'error': 'Mechanic not found'}), 404
     return jsonify(mechanic_schema.dump(mechanic)), 200
 
 #Update a mechanic
-@mechanics_bp.route('/mechanics/<int:mechanic_id>', methods=['PUT'])
+@mechanics_bp.route('/<int:mechanic_id>', methods=['PUT'])
 @limiter.limit('5 per minute; 50 per day')
 @token_required
-def update_mechanic(mechanic_id):
+def update_mechanic(current_user_id, mechanic_id):
     mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:
         return jsonify({'error': 'Mechanic not found'}), 404
@@ -67,10 +67,10 @@ def update_mechanic(mechanic_id):
     return jsonify(mechanic_schema.dump(mechanic)), 200
 
 #Partial update a mechanic
-@mechanics_bp.route('/mechanics/<int:mechanic_id>', methods=['PATCH'])
+@mechanics_bp.route('/<int:mechanic_id>', methods=['PATCH'])
 @limiter.limit('5 per minute; 50 per day')
 @token_required
-def partial_update_mechanic(mechanic_id):
+def partial_update_mechanic(current_user_id,mechanic_id):
     mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:
         return jsonify({'error': 'Mechanic not found'}), 404
@@ -84,10 +84,10 @@ def partial_update_mechanic(mechanic_id):
     return jsonify(mechanic_schema.dump(mechanic)), 200
 
 #Delete a mechanic
-@mechanics_bp.route('/mechanics/<int:mechanic_id>', methods=['DELETE'])
+@mechanics_bp.route('/<int:mechanic_id>', methods=['DELETE'])
 @limiter.limit('5 per minute; 50 per day')
 @token_required
-def delete_mechanic(mechanic_id):
+def delete_mechanic(current_user_id, mechanic_id):
     mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:
         return jsonify({'error': 'Mechanic not found'}), 404

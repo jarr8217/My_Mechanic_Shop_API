@@ -77,7 +77,8 @@ def get_customers():
 @customers_bp.route('/<int:customer_id>', methods=['GET'])
 @limiter.limit('10 per minute; 200 per day')
 @cache.cached(timeout=60)
-def get_customer(customer_id):
+@token_required
+def get_customer(current_user_id,customer_id):
     customer = db.session.get(Customer, customer_id)
     if not customer:
         return jsonify({'error': 'Customer not found'}), 404
@@ -103,7 +104,7 @@ def update_customer(customer_id):
     return customer_schema.jsonify(customer), 200
 
 # Partial update a customer
-@customers_bp.route('/update', methods=['PATCH'])
+@customers_bp.route('/', methods=['PATCH'])
 @limiter.limit('5 per minute; 50 per day')
 @token_required
 def partial_update_customer(customer_id):

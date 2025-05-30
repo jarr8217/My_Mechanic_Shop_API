@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify
 from werkzeug.security import check_password_hash
 from app.models import Customer
 from app.utils.util import encode_token
+from sqlalchemy import select
+from app import db
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -18,7 +20,7 @@ def login():
     if not email or not password:
         return jsonify({'error': 'Email and password are required'}), 400
 
-    customer = Customer.query.filter_by(email=email).first()
+    customer = db.session.execute(select(Customer).where(Customer.email == email)).scalars().first()
 
     if not customer or not check_password_hash(customer.password, password):
         return jsonify({'error': 'Invalid email or password'}), 400
