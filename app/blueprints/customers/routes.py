@@ -10,7 +10,6 @@ from app.utils.decorators import token_required
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
-
 # Customer login
 @customers_bp.route('/login', methods=['POST'])
 @limiter.limit('5 per minute; 50 per day')
@@ -69,9 +68,21 @@ def create_customer():
 @limiter.limit('10 per minute; 200 per day')
 @cache.cached(timeout=30)
 def get_customers():
+    page = int(request.args.get('page', 1))
+    limit = int(request.args.get('limit', 20))
     query = select(Customer)
-    customers = db.session.execute(query).scalars().all()
-    return customers_schema.jsonify(customers), 200
+
+    pagination = db.paginate(query, page=page, per_page=limit)
+    customers = pagination.items
+    
+
+    return jsonify({
+        "customers": customers_schema.dump(customers),
+        "page": page,
+        "per_page": limit,
+        "total": pagination.total,
+        "pages": pagination.pages
+    }), 200
 
 # Get a customer by ID
 @customers_bp.route('/<int:customer_id>', methods=['GET'])
@@ -85,10 +96,10 @@ def get_customer(current_user_id,customer_id):
     return customer_schema.jsonify(customer), 200
 
 # Update a customer
-@customers_bp.route('/', methods=['PUT'])
+@customers_bp.route('/<int:customer_id>', methods=['PUT'])
 @limiter.limit('5 per minute; 50 per day')
 @token_required
-def update_customer(customer_id):
+def update_customer(current_user_id, customer_id):
     customer = db.session.get(Customer, customer_id)
     if not customer:
         return jsonify({'error': 'Customer not found'}), 404
@@ -104,10 +115,10 @@ def update_customer(customer_id):
     return customer_schema.jsonify(customer), 200
 
 # Partial update a customer
-@customers_bp.route('/', methods=['PATCH'])
+@customers_bp.route('/<int:customer_id>', methods=['PATCH'])
 @limiter.limit('5 per minute; 50 per day')
 @token_required
-def partial_update_customer(customer_id):
+def partial_update_customer(current_user_id, customer_id):
     customer = db.session.get(Customer, customer_id)
     if not customer:
         return jsonify({'error': 'Customer not found'}), 404
@@ -123,10 +134,10 @@ def partial_update_customer(customer_id):
     return jsonify(customer_schema.dump(customer)), 200
 
 # Delete a customer
-@customers_bp.route('/delete', methods=['DELETE'])
+@customers_bp.route('/<int:customer_id>', methods=['DELETE'])
 @limiter.limit('5 per minute; 50 per day')
 @token_required
-def delete_customer(customer_id):
+def delete_customer(current_user_id, customer_id):
     customer = db.session.get(Customer, customer_id)
     if not customer:
         return jsonify({'error': 'Customer not found'}), 404
@@ -134,3 +145,21 @@ def delete_customer(customer_id):
     db.session.delete(customer)
     db.session.commit()
     return jsonify({'message': f'Customer: {customer_id}, successfully deleted!'}), 200
+
+# Get customers by search criteria
+@customers_bp.route('/search', methods=['GET'])
+@limiter.limit('10 per minute; 200 per day')
+@cache.cached(timeout=30)
+def search_customers():
+    name = request.args.get('name')
+    email = request.args.get('email')
+    query = select(Customer)
+
+    if name:
+        query = query.where(Customer.name.ilike(f'%{name}%'))
+    if email:
+        query = query.where(Customer.email.ilike(f'%{email}%'))
+
+    customers = db.session.execute(query).scalars().all()
+
+    return jsonify(customers_schema.dump(customers)), 200

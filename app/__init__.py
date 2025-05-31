@@ -1,7 +1,7 @@
 from flask import Flask
 from .extensions import ma, limiter, cache
 from .models import db
-from .blueprints.customer import customers_bp
+from .blueprints.customers import customers_bp
 from .blueprints.mechanics import mechanics_bp
 from .blueprints.service_tickets import service_tickets_bp
 from dotenv import load_dotenv
@@ -21,7 +21,7 @@ def create_app(config_name):
     cache.init_app(app)
     
     #register Blueprints
-    app.register_blueprint(customers_bp, url_prefix='/')
+    app.register_blueprint(customers_bp, url_prefix='/customers')
     app.register_blueprint(mechanics_bp, url_prefix='/mechanics')
     app.register_blueprint(service_tickets_bp, url_prefix='/service_tickets')
     app.register_blueprint(auth_bp, url_prefix='/auth')

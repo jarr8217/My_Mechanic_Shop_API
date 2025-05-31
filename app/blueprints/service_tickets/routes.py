@@ -8,6 +8,7 @@ from . import service_tickets_bp
 from app.models import Customer
 from app.models import Mechanic
 from app.extensions import limiter, cache
+from datetime import datetime
 
 
 #Create service_ticket
@@ -37,20 +38,44 @@ def create_service_ticket(customer_id):
 
 #Get all service_tickets
 @service_tickets_bp.route('/', methods=['GET'])
-@token_required
 @limiter.limit('10 per minute; 200 per day')
 @cache.cached(timeout=30)
-def get_service_tickets(customer_id):
-    query = select(Service_Ticket).where(Service_Ticket.customer_id == customer_id)
+def get_service_tickets():
+    try:
+        page = int(request.args.get('page', 1))
+        limit = int(request.args.get('limit', 20))
+    except ValueError:
+        return jsonify({'error': 'Page and limit must be integers'}), 400
+    if page < 1 or limit < 1:
+        return jsonify({'error': 'Page and limit must be positive integers'}), 400
+    
+    query = select(Service_Ticket)
     service_tickets = db.session.execute(query).scalars().all()
-    return jsonify(service_tickets_schema.dump(service_tickets)), 200
+
+    total = len(service_tickets)
+    if total == 0:
+        return jsonify({'message': 'No service tickets found'}), 404
+    
+    # Pagination logic
+    start = (page - 1) * limit
+    end = start + limit
+    paginated_tickets = service_tickets[start:end]
+    if not paginated_tickets:
+        return jsonify({'message': 'No service tickets found for the given page and limit'}), 404
+    
+    return jsonify({
+        'service_tickets': service_tickets_schema.dump(paginated_tickets),
+        'total': total,
+        'page': page,
+        'pages': (total + limit - 1) // limit  # total pages
+    }), 200
 
 # Get service_ticket by id
 @service_tickets_bp.route('/<int:ticket_id>', methods=['GET'])
-@token_required
 @limiter.limit('10 per minute; 200 per day')
 @cache.cached(timeout=30)
-def get_service_ticket(customer_id,ticket_id):
+@token_required
+def get_service_ticket(current_user_id, ticket_id):
     service_ticket = db.session.get(Service_Ticket, ticket_id)
     if not service_ticket:
         return jsonify({'error': 'Service ticket not found'}), 404
@@ -70,7 +95,7 @@ def get_customer_service_tickets(customer_id):
     return  jsonify(service_tickets_schema.dump(service_ticket)), 200
 
 # Edit service_ticket
-@service_tickets_bp.route('/<int:ticket_id>', methods=['PUT'])
+@service_tickets_bp.route('/edit/<int:ticket_id>', methods=['PUT'])
 @token_required
 @limiter.limit('5 per minute; 50 per day')
 def edit_service_ticket(current_user_id, ticket_id):
@@ -114,3 +139,44 @@ def edit_service_ticket(current_user_id, ticket_id):
     db.session.commit()
     return return_service_ticket_schema.jsonify(ticket), 200
 
+# Search service tickets
+@service_tickets_bp.route('/search', methods=['GET'])
+@limiter.limit('10 per minute; 200 per day')
+def search_service_tickets():
+    vin = request.args.get('vin')
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    service_date = request.args.get('service_date')
+    query = select(Service_Ticket)
+    
+    if vin:
+        query = query.where(Service_Ticket.VIN.ilike(f'%{vin}%'))
+    if service_date:
+        query = query.where(Service_Ticket.service_date == service_date)
+    
+    # Validate and parse date inputs YYYY-MM-DD
+    if start_date and end_date:
+        try:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+            query = query.where(Service_Ticket.service_date.between(start_date, end_date))
+        except ValueError:
+            return jsonify({'error': 'Invalid date format. Use YYYY-MM-DD.'}), 400
+    elif start_date:
+        try:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            query = query.where(Service_Ticket.service_date >= start_date)
+        except ValueError:
+            return jsonify({'error': 'Invalid date format. Use YYYY-MM-DD.'}), 400
+    elif end_date:
+        try:
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+            query = query.where(Service_Ticket.service_date <= end_date)
+        except ValueError:
+            return jsonify({'error': 'Invalid date format. Use YYYY-MM-DD.'}), 400
+
+    service_tickets = db.session.execute(query).scalars().all()
+   
+    if not service_tickets:
+        return jsonify({'message': 'No service tickets found'}), 404
+    return jsonify(service_tickets_schema.dump(service_tickets)), 200

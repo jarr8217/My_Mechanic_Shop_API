@@ -30,11 +30,29 @@ def create_mechanic():
 @mechanics_bp.route('/', methods=['GET'])
 @limiter.limit('10 per minute; 200 per day')
 @cache.cached(timeout=30)
-@token_required
-def get_mechanics(customer_id):
+def get_mechanics():
+    try:
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 20))
+    except ValueError:
+        return jsonify({'error': 'Page and per_page must be integers'}), 400
+
+    if page < 1 or per_page < 1:
+        return jsonify({'error': 'Page and per_page must be positive integers'}), 400
+
     query = select(Mechanic)
-    mechanics = db.session.execute(query).scalars().all()
-    return jsonify(mechanics_schema.dump(mechanics)), 200
+    pagination = db.paginate(query, page=page, per_page=per_page)
+    mechanics = pagination.items
+
+    return jsonify({
+        'mechanics': mechanics_schema.dump(mechanics),
+        'total': pagination.total,
+        'pages': pagination.pages,
+        'current_page': pagination.page,
+        'has_next': pagination.has_next,
+        'has_prev': pagination.has_prev
+    }), 200
+
 
 #Get a mechanic by ID
 @mechanics_bp.route('/<int:mechanic_id>', methods=['GET'])
@@ -96,3 +114,35 @@ def delete_mechanic(current_user_id, mechanic_id):
     db.session.commit()
     return jsonify({'message': 'Mechanic deleted successfully'}), 200
 
+
+# GET mechanics by amount of service tickets
+@mechanics_bp.route('/popular', methods=['GET'])
+@limiter.limit('10 per minute; 200 per day')
+@cache.cached(timeout=60)
+def get_popular_mechanics():
+    query = select(Mechanic)
+    mechanics = db.session.execute(query).scalars().all()
+
+    mechanics.sort(key=lambda m: len(m.service_tickets), reverse=True)
+
+    return mechanics_schema.jsonify(mechanics), 200
+
+# Get mechanics by name or email
+@mechanics_bp.route('/search', methods=['GET'])
+@limiter.limit('10 per minute; 200 per day')
+def serch_mechanic():
+    name = request.args.get('name')
+    email = request.args.get('email')
+    query = select(Mechanic)
+    
+    if not name and not email:
+        return jsonify({'error': 'At least one search parameter is required'}), 400
+
+    if name:
+        query = query.where(Mechanic.name.ilike(f'%{name}%'))
+    if email:
+        query = query.where(Mechanic.email.ilike(f'%{email}%'))
+
+    mechanics = db.session.execute(query).scalars().all()
+
+    return mechanics_schema.jsonify(mechanics), 200
