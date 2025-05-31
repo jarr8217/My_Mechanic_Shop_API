@@ -19,7 +19,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"fxgh\",\r\n    \"email\": \"Fdg@example.com\",\r\n    \"phone\": \"999-555-4055\"\r\n}",
+							"raw": "{\r\n  \"name\": \"Test User 2\",\r\n  \"email\": \"testuser2@example.com\",\r\n  \"phone\": \"123-456-7890\",\r\n  \"password\": \"strongpassword\"\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -35,6 +35,34 @@
 							"port": "5000",
 							"path": [
 								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"testuser2@example.com\",\r\n  \"password\": \"strongpassword\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"login"
 							]
 						}
 					},
@@ -49,14 +77,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/",
+							"raw": "http://localhost:5000/customers",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "5000",
 							"path": [
-								""
+								"customers"
 							]
 						}
 					},
@@ -69,7 +97,14 @@
 					},
 					"request": {
 						"auth": {
-							"type": "noauth"
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg2MjA2MjMsImlhdCI6MTc0ODYxNzAyMywic3ViIjoiMjEifQ.pa8V372q9l89YdSIkpaYC89GykGJYsnUnWuIvoAlons",
+									"type": "string"
+								}
+							]
 						},
 						"method": "GET",
 						"header": [],
@@ -83,14 +118,14 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/6",
+							"raw": "http://localhost:5000/",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "5000",
 							"path": [
-								"6"
+								""
 							]
 						}
 					},
@@ -100,13 +135,26 @@
 					"name": "update customer",
 					"request": {
 						"auth": {
-							"type": "noauth"
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg2NTUwNTYsImlhdCI6MTc0ODY1MTQ1Niwic3ViIjoiMjEifQ.Np0QXLeN163SUJa45l0S0Jk23oVM-k2GMIKlOFLQ2_g",
+									"type": "string"
+								}
+							]
 						},
 						"method": "PUT",
-						"header": [],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{ \r\n    \"name\": \"Aurora Ron Menendez\",\r\n    \"email\": \"Aron@example.com\",\r\n    \"phone\": \"609-777-0000\"\r\n}",
+							"raw": "{\r\n  \"name\": \"Test User Updated 2\",\r\n  \"email\": \"testuser233@example.com\",\r\n  \"phone\": \"111-222-5555\",\r\n  \"password\": \"strongpassword\"\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -114,14 +162,15 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/4",
+							"raw": "http://localhost:5000/customers/2",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "5000",
 							"path": [
-								"4"
+								"customers",
+								"2"
 							]
 						}
 					},
@@ -131,7 +180,14 @@
 					"name": "Partially update customer",
 					"request": {
 						"auth": {
-							"type": "noauth"
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg1NzExOTIsImlhdCI6MTc0ODU2NzU5Miwic3ViIjoiMTgifQ.FkAoggSz_rd0TSUxcb37NB_oK4CC1hZzG_Xgv3WAPcY",
+									"type": "string"
+								}
+							]
 						},
 						"method": "PATCH",
 						"header": [
@@ -143,33 +199,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"name\": \"Anthony Stank\"\r\n}\r\n"
-						},
-						"url": {
-							"raw": "http://localhost:5000/3",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "5000",
-							"path": [
-								"3"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete customer",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "DELETE",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{ \r\n    \"name\": \"Aurora Ron-Menendez\",\r\n    \"email\": \"Aron@example.com\",\r\n    \"phone\": \"609-777-0000\"\r\n}"
+							"raw": "{\r\n  \"name\": \"Postman Test\"\r\n}\r\n"
 						},
 						"url": {
 							"raw": "http://localhost:5000/",
@@ -180,6 +210,132 @@
 							"port": "5000",
 							"path": [
 								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete customer",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg2NTUwNTYsImlhdCI6MTc0ODY1MTQ1Niwic3ViIjoiMjEifQ.Np0QXLeN163SUJa45l0S0Jk23oVM-k2GMIKlOFLQ2_g",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/customers/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"customers",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Query by name",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Test User 1\",\r\n  \"email\": \"testuserx@example.com\",\r\n  \"phone\": \"123-456-7890\",\r\n  \"password\": \"strongpassword\"\r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://localhost:5000/customers/search?name=User",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"customers",
+								"search"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "User"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pagination",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/customers/search?page=1&limit=20",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"customers",
+								"search"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Query by email",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/customers/search?email=User",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"customers",
+								"search"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "User"
+								}
 							]
 						}
 					},
@@ -197,10 +353,16 @@
 							"type": "noauth"
 						},
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"xcv\",\r\n    \"email\": \"fbgdf\",\r\n    \"phone\": \"258-963-7895\",\r\n    \"salary\": \"64120\"\r\n}",
+							"raw": "{\r\n  \"name\": \"Pat McWrench\",\r\n  \"email\": \"pat.mcwrench@example.com\",\r\n  \"phone\": \"555-123-4567\",\r\n  \"salary\": 65000\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -228,23 +390,31 @@
 					},
 					"request": {
 						"auth": {
-							"type": "noauth"
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg2MjA2MjMsImlhdCI6MTc0ODYxNzAyMywic3ViIjoiMjEifQ.pa8V372q9l89YdSIkpaYC89GykGJYsnUnWuIvoAlons",
+									"type": "string"
+								}
+							]
 						},
 						"method": "GET",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"John Smith\",\r\n    \"email\": \"JSmith@example.com\",\r\n    \"phone\": \"111-333-4444\",\r\n    \"salary\": \"60000\"\r\n}"
+							"raw": ""
 						},
 						"url": {
-							"raw": "http://localhost:5000/mechanics",
+							"raw": "http://localhost:5000/mechanics/13",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "5000",
 							"path": [
-								"mechanics"
+								"mechanics",
+								"13"
 							]
 						}
 					},
@@ -257,7 +427,14 @@
 					},
 					"request": {
 						"auth": {
-							"type": "noauth"
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg1NzM0NDYsImlhdCI6MTc0ODU2OTg0Niwic3ViIjoiMjAifQ.fXjfJFNpE0n0czqDcqEwss0Vve24qr1_PVhhhPXVpRo",
+									"type": "string"
+								}
+							]
 						},
 						"method": "GET",
 						"header": [
@@ -272,7 +449,7 @@
 							"raw": "{\r\n  \"email\": \"newemail@example.com\",\r\n  \"salary\": 75000\r\n}\r\n"
 						},
 						"url": {
-							"raw": "http://localhost:5000/mechanics/2",
+							"raw": "http://localhost:5000/mechanics/13",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -280,7 +457,7 @@
 							"port": "5000",
 							"path": [
 								"mechanics",
-								"2"
+								"13"
 							]
 						}
 					},
@@ -290,7 +467,14 @@
 					"name": "Update Mechanic",
 					"request": {
 						"auth": {
-							"type": "noauth"
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg1NzM0NDYsImlhdCI6MTc0ODU2OTg0Niwic3ViIjoiMjAifQ.fXjfJFNpE0n0czqDcqEwss0Vve24qr1_PVhhhPXVpRo",
+									"type": "string"
+								}
+							]
 						},
 						"method": "PUT",
 						"header": [],
@@ -322,7 +506,14 @@
 					"name": "Partially update mechanic",
 					"request": {
 						"auth": {
-							"type": "noauth"
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg1NzM0NDYsImlhdCI6MTc0ODU2OTg0Niwic3ViIjoiMjAifQ.fXjfJFNpE0n0czqDcqEwss0Vve24qr1_PVhhhPXVpRo",
+									"type": "string"
+								}
+							]
 						},
 						"method": "PATCH",
 						"header": [
@@ -334,7 +525,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"email\": \"newemail@example.com\",\r\n  \"salary\": 75000\r\n}\r\n",
+							"raw": "{\r\n  \"email\": \"newemail3@example.com\",\r\n  \"salary\": 75000\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -342,7 +533,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/mechanics/2",
+							"raw": "http://localhost:5000/mechanics/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -350,7 +541,7 @@
 							"port": "5000",
 							"path": [
 								"mechanics",
-								"2"
+								"1"
 							]
 						}
 					},
@@ -360,12 +551,19 @@
 					"name": "Delete mechanic",
 					"request": {
 						"auth": {
-							"type": "noauth"
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg1NzM0NDYsImlhdCI6MTc0ODU2OTg0Niwic3ViIjoiMjAifQ.fXjfJFNpE0n0czqDcqEwss0Vve24qr1_PVhhhPXVpRo",
+									"type": "string"
+								}
+							]
 						},
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/mechanics/6",
+							"raw": "http://localhost:5000/mechanics/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -373,22 +571,142 @@
 							"port": "5000",
 							"path": [
 								"mechanics",
-								"6"
+								"1"
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "Popular",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg1NzM0NDYsImlhdCI6MTc0ODU2OTg0Niwic3ViIjoiMjAifQ.fXjfJFNpE0n0czqDcqEwss0Vve24qr1_PVhhhPXVpRo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"newemail@example.com\",\r\n  \"salary\": 75000\r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://localhost:5000/mechanics/popular",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"mechanics",
+								"popular"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Query by name",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Test User 1\",\r\n  \"email\": \"testuserx@example.com\",\r\n  \"phone\": \"123-456-7890\",\r\n  \"password\": \"strongpassword\"\r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://localhost:5000/mechanics/search?name=J",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"mechanics",
+								"search"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "J"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Query by email",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/mechanics/search?email=j",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"mechanics",
+								"search"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "j"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pagination",
+					"request": {
+						"method": "GET",
+						"header": []
 					},
 					"response": []
 				}
 			]
 		},
 		{
-			"name": "New Folder",
+			"name": "Service_Tickets",
 			"item": [
 				{
 					"name": "Create Service Tickets",
 					"request": {
 						"auth": {
-							"type": "noauth"
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg1NzM0NDYsImlhdCI6MTc0ODU2OTg0Niwic3ViIjoiMjAifQ.fXjfJFNpE0n0czqDcqEwss0Vve24qr1_PVhhhPXVpRo",
+									"type": "string"
+								}
+							]
 						},
 						"method": "POST",
 						"header": [
@@ -400,7 +718,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"VIN\": \"RACEVIN003\",\r\n  \"service_date\": \"2025-05-23\",\r\n  \"service_desc\": \"Install titanium cat-back exhaust and flash ECU with race performance map\",\r\n  \"customer_id\": 3\r\n}\r\n\r\n"
+							"raw": "{\r\n  \"VIN\": \"1TESTVIN2025SPEED\",\r\n  \"service_date\": \"2025-05-30\",\r\n  \"service_desc\": \"Oil change and brake inspection\"\r\n}\r\n\r\n\r\n"
 						},
 						"url": {
 							"raw": "http://localhost:5000/service_tickets",
@@ -423,7 +741,14 @@
 					},
 					"request": {
 						"auth": {
-							"type": "noauth"
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg1NzM0NDYsImlhdCI6MTc0ODU2OTg0Niwic3ViIjoiMjAifQ.fXjfJFNpE0n0czqDcqEwss0Vve24qr1_PVhhhPXVpRo",
+									"type": "string"
+								}
+							]
 						},
 						"method": "GET",
 						"header": [
@@ -438,7 +763,7 @@
 							"raw": "{\r\n  \"VIN\": \"RACEVIN003\",\r\n  \"service_date\": \"2025-05-23\",\r\n  \"service_desc\": \"Install titanium cat-back exhaust and flash ECU with race performance map\",\r\n  \"customer_id\": 3\r\n}\r\n\r\n"
 						},
 						"url": {
-							"raw": "http://localhost:5000/service_tickets/2",
+							"raw": "http://localhost:5000/service_tickets/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -446,7 +771,7 @@
 							"port": "5000",
 							"path": [
 								"service_tickets",
-								"2"
+								"1"
 							]
 						}
 					},
@@ -459,7 +784,14 @@
 					},
 					"request": {
 						"auth": {
-							"type": "noauth"
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg1NzM0NDYsImlhdCI6MTc0ODU2OTg0Niwic3ViIjoiMjAifQ.fXjfJFNpE0n0czqDcqEwss0Vve24qr1_PVhhhPXVpRo",
+									"type": "string"
+								}
+							]
 						},
 						"method": "GET",
 						"header": [
@@ -474,24 +806,32 @@
 							"raw": "{\r\n  \"VIN\": \"RACEVIN003\",\r\n  \"service_date\": \"2025-05-23\",\r\n  \"service_desc\": \"Install titanium cat-back exhaust and flash ECU with race performance map\",\r\n  \"customer_id\": 3\r\n}\r\n\r\n"
 						},
 						"url": {
-							"raw": "http://localhost:5000/service_tickets",
+							"raw": "http://localhost:5000/service_tickets/",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "5000",
 							"path": [
-								"service_tickets"
+								"service_tickets",
+								""
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Assign Mechanic to ticket",
+					"name": "Edit ticket",
 					"request": {
 						"auth": {
-							"type": "noauth"
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg1Nzc0MDYsImlhdCI6MTc0ODU3MzgwNiwic3ViIjoiMjAifQ.-y-6k4pBnLaRQr6p3wnwKSKHeC2eHlZOI5AtqJhliBA",
+									"type": "string"
+								}
+							]
 						},
 						"method": "PUT",
 						"header": [
@@ -503,10 +843,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"VIN\": \"RACEVIN003\",\r\n  \"service_date\": \"2025-05-23\",\r\n  \"service_desc\": \"Install titanium cat-back exhaust and flash ECU with race performance map\",\r\n  \"customer_id\": 3\r\n}\r\n\r\n"
+							"raw": "{\r\n  \"add_mechanic_ids\": [2, 13, 3],\r\n  \"remove_mechanic_ids\": []\r\n}\r\n\r\n"
 						},
 						"url": {
-							"raw": "http://localhost:5000/service_tickets/4/add_mechanic/7",
+							"raw": "http://localhost:5000/service_tickets/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -514,34 +854,41 @@
 							"port": "5000",
 							"path": [
 								"service_tickets",
-								"4",
-								"add_mechanic",
-								"7"
+								"1"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Remove mechanic from ticket",
+					"name": "All service tickets by customer",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
 					"request": {
 						"auth": {
-							"type": "noauth"
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg1Nzc0MDYsImlhdCI6MTc0ODU3MzgwNiwic3ViIjoiMjAifQ.-y-6k4pBnLaRQr6p3wnwKSKHeC2eHlZOI5AtqJhliBA",
+									"type": "string"
+								}
+							]
 						},
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
+						"method": "GET",
+						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"VIN\": \"RACEVIN003\",\r\n  \"service_date\": \"2025-05-23\",\r\n  \"service_desc\": \"Install titanium cat-back exhaust and flash ECU with race performance map\",\r\n  \"customer_id\": 3\r\n}\r\n\r\n"
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/service_tickets/2/remove_mechanic/4",
+							"raw": "http://localhost:5000/service_tickets/17",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -549,9 +896,33 @@
 							"port": "5000",
 							"path": [
 								"service_tickets",
-								"2",
-								"remove_mechanic",
-								"4"
+								"17"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "service ticket by vin or date",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/service_tickets/search?datetime=2025",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"service_tickets",
+								"search"
+							],
+							"query": [
+								{
+									"key": "datetime",
+									"value": "2025"
+								}
 							]
 						}
 					},
@@ -561,5 +932,3 @@
 		}
 	]
 }
-
-
