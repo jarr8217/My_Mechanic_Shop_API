@@ -28,7 +28,6 @@ def create_mechanic():
 
 #Get all mechanics
 @mechanics_bp.route('/', methods=['GET'])
-@limiter.limit('10 per minute; 200 per day')
 @cache.cached(timeout=30)
 def get_mechanics():
     try:
@@ -56,7 +55,6 @@ def get_mechanics():
 
 #Get a mechanic by ID
 @mechanics_bp.route('/<int:mechanic_id>', methods=['GET'])
-@limiter.limit('10 per minute; 200 per day')
 @cache.cached(timeout=30)
 @token_required
 def get_mechanic_by_id(current_user_id, mechanic_id):
@@ -112,13 +110,13 @@ def delete_mechanic(current_user_id, mechanic_id):
 
     db.session.delete(mechanic)
     db.session.commit()
-    return jsonify({'message': 'Mechanic deleted successfully'}), 200
+    return jsonify({'message': f'Mechanic: ID: {mechanic.id} Name: {mechanic.name} deleted successfully'}), 200
 
 
 # GET mechanics by amount of service tickets
 @mechanics_bp.route('/popular', methods=['GET'])
-@limiter.limit('10 per minute; 200 per day')
 @cache.cached(timeout=60)
+@token_required
 def get_popular_mechanics():
     query = select(Mechanic)
     mechanics = db.session.execute(query).scalars().all()
@@ -129,7 +127,7 @@ def get_popular_mechanics():
 
 # Get mechanics by name or email
 @mechanics_bp.route('/search', methods=['GET'])
-@limiter.limit('10 per minute; 200 per day')
+@token_required
 def serch_mechanic():
     name = request.args.get('name')
     email = request.args.get('email')

@@ -9,6 +9,9 @@ from app.models import Customer
 from app.models import Mechanic
 from app.extensions import limiter, cache
 from datetime import datetime
+from app.models import db, Service_Ticket, Inventory, ServiceTicketInventory
+from flask import request, jsonify
+
 
 
 #Create service_ticket
@@ -38,7 +41,6 @@ def create_service_ticket(customer_id):
 
 #Get all service_tickets
 @service_tickets_bp.route('/', methods=['GET'])
-@limiter.limit('10 per minute; 200 per day')
 @cache.cached(timeout=30)
 def get_service_tickets():
     try:
@@ -61,8 +63,8 @@ def get_service_tickets():
     end = start + limit
     paginated_tickets = service_tickets[start:end]
     if not paginated_tickets:
-        return jsonify({'message': 'No service tickets found for the given page and limit'}), 404
-    
+        return jsonify({'message': 'No service tickets found for the given page and limit.'}), 404
+
     return jsonify({
         'service_tickets': service_tickets_schema.dump(paginated_tickets),
         'total': total,
@@ -72,21 +74,19 @@ def get_service_tickets():
 
 # Get service_ticket by id
 @service_tickets_bp.route('/<int:ticket_id>', methods=['GET'])
-@limiter.limit('10 per minute; 200 per day')
 @cache.cached(timeout=30)
 @token_required
 def get_service_ticket(current_user_id, ticket_id):
     service_ticket = db.session.get(Service_Ticket, ticket_id)
     if not service_ticket:
-        return jsonify({'error': 'Service ticket not found'}), 404
+        return jsonify({'error': 'Service ticket not found.'}), 404
     return jsonify(service_ticket_schema.dump(service_ticket)), 200
 
 # Get all service tickets for a customer
 @service_tickets_bp.route('/my-tickets', methods=['GET'])
 @token_required
-@limiter.limit('10 per minute; 200 per day')
-def get_customer_service_tickets(customer_id):
-    query = select(Service_Ticket).where(Service_Ticket.customer_id == customer_id)
+def get_customer_service_tickets(current_user_id):
+    query = select(Service_Ticket).where(Service_Ticket.customer_id == current_user_id)
     service_ticket = db.session.execute(query).scalars().all()
 
     if not service_ticket:
@@ -141,7 +141,6 @@ def edit_service_ticket(current_user_id, ticket_id):
 
 # Search service tickets
 @service_tickets_bp.route('/search', methods=['GET'])
-@limiter.limit('10 per minute; 200 per day')
 def search_service_tickets():
     vin = request.args.get('vin')
     start_date = request.args.get('start_date')
@@ -150,7 +149,7 @@ def search_service_tickets():
     query = select(Service_Ticket)
     
     if vin:
-        query = query.where(Service_Ticket.VIN.ilike(f'%{vin}%'))
+        query = query.where(Service_Ticket.VIN.ilike(f'%{vin.lower()}%'))
     if service_date:
         query = query.where(Service_Ticket.service_date == service_date)
     
@@ -178,5 +177,67 @@ def search_service_tickets():
     service_tickets = db.session.execute(query).scalars().all()
    
     if not service_tickets:
-        return jsonify({'message': 'No service tickets found'}), 404
+        return jsonify({'message': 'No service tickets found.'}), 404
     return jsonify(service_tickets_schema.dump(service_tickets)), 200
+
+# ADD or Update inventory parts
+@service_tickets_bp.route('/<int:ticket_id>/add_part/<int:inventory_id>', methods=['PUT'])
+#@token_required
+def add_update_inventory_parts(ticket_id, inventory_id):
+    data = request.json
+    quantity = data.get('quantity')
+
+    if not isinstance(quantity, int) or quantity < 1:
+        return jsonify({'error': 'Quantity must be a positive integer.'}), 400
+
+    ticket = db.session.get(Service_Ticket, ticket_id)
+    part = db.session.get(Inventory, inventory_id)
+
+    if not ticket or not part:
+        return jsonify({'error': 'Service ticket or inventory part not found.'}), 404
+    
+    # Check if association already exists
+    association = db.session.query(ServiceTicketInventory).filter_by(service_ticket_id=ticket_id, inventory_id=inventory_id).first()
+
+    if association:
+        association.quantity = quantity
+        msg = f'Updated quantity of part {part.part_name} in service ticket {ticket.id} to {quantity}.'
+    else:
+        new_association = ServiceTicketInventory(service_ticket_id=ticket_id, inventory_id=inventory_id, quantity=quantity)
+        db.session.add(new_association)
+        msg = f'Added part {part.part_name} to service ticket {ticket.id} with quantity {quantity}.'
+
+    db.session.commit()
+    return jsonify({'message': msg}), 200
+
+
+# Remove inventory parts from service ticket
+@service_tickets_bp.route('/<int:ticket_id>/remove_part/<int:inventory_id>', methods=['DELETE'])
+@limiter.limit('5 per minute; 50 per day')
+def remove_inventory_part(ticket_id, inventory_id):
+    association = db.session.query(ServiceTicketInventory).filter_by(service_ticket_id=ticket_id, inventory_id=inventory_id).first()
+
+    if not association:
+        return jsonify({'error': f'Part ID {inventory_id} not found in service ticket ID {ticket_id}.'}), 404
+
+    db.session.delete(association)
+    db.session.commit()
+    return jsonify({'message': f'Removed part {inventory_id} from service ticket {ticket_id}.'}), 200
+
+#List all parts (with quantity) in a service ticket
+@service_tickets_bp.route('<int:ticket_id>/parts', methods=['GET'])
+def get_service_ticket_parts(ticket_id):
+    ticket = db.session.get(Service_Ticket, ticket_id)
+    if not ticket:
+        return jsonify({'error': f'Service ticket ID {ticket_id} not found.'}), 404
+    
+    parts = []
+    for association in ticket.part_associations:
+        part = association.inventory
+        parts.append({
+            'id': part.id,
+            'part_name': part.part_name,
+            'quantity': association.quantity
+        })
+
+    return jsonify({'Service ticket ID': ticket_id, 'Parts': parts}), 200

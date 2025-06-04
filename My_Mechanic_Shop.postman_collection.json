@@ -265,7 +265,7 @@
 							"raw": "{\r\n  \"name\": \"Test User 1\",\r\n  \"email\": \"testuserx@example.com\",\r\n  \"phone\": \"123-456-7890\",\r\n  \"password\": \"strongpassword\"\r\n}\r\n"
 						},
 						"url": {
-							"raw": "http://localhost:5000/customers/search?name=User",
+							"raw": "http://localhost:5000/customers/search?name=J",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -278,7 +278,7 @@
 							"query": [
 								{
 									"key": "name",
-									"value": "User"
+									"value": "J"
 								}
 							]
 						}
@@ -321,7 +321,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/customers/search?email=User",
+							"raw": "http://localhost:5000/customers/search?email=ka",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -334,7 +334,7 @@
 							"query": [
 								{
 									"key": "email",
-									"value": "User"
+									"value": "ka"
 								}
 							]
 						}
@@ -362,7 +362,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"name\": \"Pat McWrench\",\r\n  \"email\": \"pat.mcwrench@example.com\",\r\n  \"phone\": \"555-123-4567\",\r\n  \"salary\": 65000\r\n}\r\n",
+							"raw": "{\r\n  \"name\": \"Mike Wrench\",\r\n  \"email\": \"mike.wrench@example.com\",\r\n  \"phone\": \"555-987-6543\",\r\n  \"salary\": 50000.0\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -394,7 +394,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg2MjA2MjMsImlhdCI6MTc0ODYxNzAyMywic3ViIjoiMjEifQ.pa8V372q9l89YdSIkpaYC89GykGJYsnUnWuIvoAlons",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg4MzA3NjcsImlhdCI6MTc0ODgyNzE2Nywic3ViIjoiMSJ9.eCsY_RKD89vqGuMF-laWJ4ptohfvbMHl3euHNOsH-zk",
 									"type": "string"
 								}
 							]
@@ -406,15 +406,14 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "http://localhost:5000/mechanics/13",
+							"raw": "http://localhost:5000/mechanics",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "5000",
 							"path": [
-								"mechanics",
-								"13"
+								"mechanics"
 							]
 						}
 					},
@@ -471,7 +470,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg1NzM0NDYsImlhdCI6MTc0ODU2OTg0Niwic3ViIjoiMjAifQ.fXjfJFNpE0n0czqDcqEwss0Vve24qr1_PVhhhPXVpRo",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg4MzA3NjcsImlhdCI6MTc0ODgyNzE2Nywic3ViIjoiMSJ9.eCsY_RKD89vqGuMF-laWJ4ptohfvbMHl3euHNOsH-zk",
 									"type": "string"
 								}
 							]
@@ -480,7 +479,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"John Doe\",\r\n    \"email\": \"JSmith@example.com\",\r\n    \"phone\": \"111-333-4444\",\r\n    \"salary\": \"60000\"\r\n}",
+							"raw": "{\r\n    \"name\": \"Michael Wrench\",\r\n    \"email\": \"MWrench@example.com\",\r\n    \"phone\": \"111-333-4444\",\r\n    \"salary\": \"60001\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -510,7 +509,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg1NzM0NDYsImlhdCI6MTc0ODU2OTg0Niwic3ViIjoiMjAifQ.fXjfJFNpE0n0czqDcqEwss0Vve24qr1_PVhhhPXVpRo",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg4MzA3NjcsImlhdCI6MTc0ODgyNzE2Nywic3ViIjoiMSJ9.eCsY_RKD89vqGuMF-laWJ4ptohfvbMHl3euHNOsH-zk",
 									"type": "string"
 								}
 							]
@@ -525,7 +524,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"email\": \"newemail3@example.com\",\r\n  \"salary\": 75000\r\n}\r\n",
+							"raw": "{\r\n  \"email\": \"mwrench@example.com\",\r\n  \"salary\": 60000\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -636,7 +635,7 @@
 							"raw": "{\r\n  \"name\": \"Test User 1\",\r\n  \"email\": \"testuserx@example.com\",\r\n  \"phone\": \"123-456-7890\",\r\n  \"password\": \"strongpassword\"\r\n}\r\n"
 						},
 						"url": {
-							"raw": "http://localhost:5000/mechanics/search?name=J",
+							"raw": "http://localhost:5000/mechanics/search?name=mike",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -649,7 +648,7 @@
 							"query": [
 								{
 									"key": "name",
-									"value": "J"
+									"value": "mike"
 								}
 							]
 						}
@@ -662,7 +661,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/mechanics/search?email=j",
+							"raw": "http://localhost:5000/mechanics/search?email=mike",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -675,7 +674,7 @@
 							"query": [
 								{
 									"key": "email",
-									"value": "j"
+									"value": "mike"
 								}
 							]
 						}
@@ -686,7 +685,29 @@
 					"name": "Pagination",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/mechanics/?page=1&limit=20",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"mechanics",
+								""
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						}
 					},
 					"response": []
 				}
@@ -703,7 +724,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg1NzM0NDYsImlhdCI6MTc0ODU2OTg0Niwic3ViIjoiMjAifQ.fXjfJFNpE0n0czqDcqEwss0Vve24qr1_PVhhhPXVpRo",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg4MzA3NjcsImlhdCI6MTc0ODgyNzE2Nywic3ViIjoiMSJ9.eCsY_RKD89vqGuMF-laWJ4ptohfvbMHl3euHNOsH-zk",
 									"type": "string"
 								}
 							]
@@ -718,7 +739,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"VIN\": \"1TESTVIN2025SPEED\",\r\n  \"service_date\": \"2025-05-30\",\r\n  \"service_desc\": \"Oil change and brake inspection\"\r\n}\r\n\r\n\r\n"
+							"raw": "{\r\n  \"VIN\": \"1HGCM82633A004352\",\r\n  \"service_desc\": \"Car makes a strange noise.\",\r\n  \"service_date\": \"2025-06-02\"\r\n}\r\n"
 						},
 						"url": {
 							"raw": "http://localhost:5000/service_tickets",
@@ -745,7 +766,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg1NzM0NDYsImlhdCI6MTc0ODU2OTg0Niwic3ViIjoiMjAifQ.fXjfJFNpE0n0czqDcqEwss0Vve24qr1_PVhhhPXVpRo",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg4MzA3NjcsImlhdCI6MTc0ODgyNzE2Nywic3ViIjoiMSJ9.eCsY_RKD89vqGuMF-laWJ4ptohfvbMHl3euHNOsH-zk",
 									"type": "string"
 								}
 							]
@@ -828,7 +849,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg1Nzc0MDYsImlhdCI6MTc0ODU3MzgwNiwic3ViIjoiMjAifQ.-y-6k4pBnLaRQr6p3wnwKSKHeC2eHlZOI5AtqJhliBA",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg4MzA3NjcsImlhdCI6MTc0ODgyNzE2Nywic3ViIjoiMSJ9.eCsY_RKD89vqGuMF-laWJ4ptohfvbMHl3euHNOsH-zk",
 									"type": "string"
 								}
 							]
@@ -843,10 +864,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"add_mechanic_ids\": [2, 13, 3],\r\n  \"remove_mechanic_ids\": []\r\n}\r\n\r\n"
+							"raw": "{\r\n  \"add_mechanic_ids\": [1],\r\n  \"remove_mechanic_ids\": []\r\n}\r\n\r\n"
 						},
 						"url": {
-							"raw": "http://localhost:5000/service_tickets/1",
+							"raw": "http://localhost:5000/service_tickets/edit/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -854,6 +875,7 @@
 							"port": "5000",
 							"path": [
 								"service_tickets",
+								"edit",
 								"1"
 							]
 						}
@@ -871,7 +893,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg1Nzc0MDYsImlhdCI6MTc0ODU3MzgwNiwic3ViIjoiMjAifQ.-y-6k4pBnLaRQr6p3wnwKSKHeC2eHlZOI5AtqJhliBA",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg4MzE1NjksImlhdCI6MTc0ODgyNzk2OSwic3ViIjoiMSJ9.fIef6XtBX4BOxPY0GPILEREIJ1ljAS2QusHoQyE8rLk",
 									"type": "string"
 								}
 							]
@@ -888,7 +910,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/service_tickets/17",
+							"raw": "http://localhost:5000/service_tickets/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -896,7 +918,7 @@
 							"port": "5000",
 							"path": [
 								"service_tickets",
-								"17"
+								"1"
 							]
 						}
 					},
@@ -908,7 +930,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/service_tickets/search?datetime=2025",
+							"raw": "http://localhost:5000/service_tickets/search?datetime=1h",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -921,7 +943,7 @@
 							"query": [
 								{
 									"key": "datetime",
-									"value": "2025"
+									"value": "1h"
 								}
 							]
 						}

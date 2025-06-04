@@ -1,45 +1,16 @@
-from app.utils.util import encode_token
-from .schemas import customer_schema, customers_schema, login_schema
+from .schemas import customer_schema, customers_schema
 from flask import request, jsonify
 from marshmallow import ValidationError
-from sqlalchemy import select
+from sqlalchemy import func, select
 from app.models import Customer, db
 from . import customers_bp
 from app.extensions import limiter, cache
 from app.utils.decorators import token_required
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
 
 
-# Customer login
-@customers_bp.route('/login', methods=['POST'])
-@limiter.limit('5 per minute; 50 per day')
-def login():
-    try:
-        credentials = login_schema.load(request.json)
-    except ValidationError as e:
-        return jsonify(e.messages), 400
-    
-    email = credentials['email']
-    password = credentials['password']
-
-    query = select(Customer).where(Customer.email == email)
-    customer = db.session.execute(query).scalars().first()
-
-    if not customer or not check_password_hash(customer.password, password):
-        return jsonify({'message': 'Invalid email or password'}), 401
-
-    token = encode_token(customer.id)
-
-    response = {
-        'status': 'success',
-        'message': 'successfully logged in',
-        'token': token
-    }
-
-    return jsonify(response), 200
 # Create a new customer
 @customers_bp.route('/', methods=['POST'])
-@limiter.limit("3 per minute; 30 per day")
 def create_customer():
     try:
         customer_data = customer_schema.load(request.json)
@@ -65,7 +36,6 @@ def create_customer():
 
 # Get all customers
 @customers_bp.route('/', methods=['GET'])
-@limiter.limit('10 per minute; 200 per day')
 @cache.cached(timeout=30)
 def get_customers():
     page = int(request.args.get('page', 1))
@@ -86,7 +56,6 @@ def get_customers():
 
 # Get a customer by ID
 @customers_bp.route('/<int:customer_id>', methods=['GET'])
-@limiter.limit('10 per minute; 200 per day')
 @cache.cached(timeout=60)
 @token_required
 def get_customer(current_user_id,customer_id):
@@ -148,18 +117,23 @@ def delete_customer(current_user_id, customer_id):
 
 # Get customers by search criteria
 @customers_bp.route('/search', methods=['GET'])
-@limiter.limit('10 per minute; 200 per day')
-@cache.cached(timeout=30)
+@token_required
 def search_customers():
     name = request.args.get('name')
     email = request.args.get('email')
     query = select(Customer)
 
     if name:
-        query = query.where(Customer.name.ilike(f'%{name}%'))
+        query = query.where(func.lower(Customer.name).ilike(f'%{name.lower()}%'))
     if email:
-        query = query.where(Customer.email.ilike(f'%{email}%'))
+        query = query.where(func.lower(Customer.email).ilike(f'%{email.lower()}%'))
+    if not name and not email:
+        return jsonify({'message': 'Please provide at least one search criteria (name or email)'}), 400
 
     customers = db.session.execute(query).scalars().all()
-
+    if not customers:
+        return jsonify({'message': 'No customers found matching the criteria'}), 404
+    
     return jsonify(customers_schema.dump(customers)), 200
+
+
