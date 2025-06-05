@@ -1,4 +1,4 @@
-from app.utils.decorators import token_required
+from app.utils.decorators import mechanic_required, token_required
 from .schemas import service_ticket_schema, service_tickets_schema, edit_service_ticket_schema, return_service_ticket_schema
 from flask import request, jsonify
 from marshmallow import ValidationError
@@ -96,9 +96,9 @@ def get_customer_service_tickets(current_user_id):
 
 # Edit service_ticket
 @service_tickets_bp.route('/edit/<int:ticket_id>', methods=['PUT'])
-@token_required
+@mechanic_required
 @limiter.limit('5 per minute; 50 per day')
-def edit_service_ticket(current_user_id, ticket_id):
+def edit_service_ticket(current_user_id, current_user_role, ticket_id):
     try:
         ticket_edit = edit_service_ticket_schema.load(request.json)
     except ValidationError as e:
@@ -141,6 +141,8 @@ def edit_service_ticket(current_user_id, ticket_id):
 
 # Search service tickets
 @service_tickets_bp.route('/search', methods=['GET'])
+@cache.cached(timeout=30)
+@mechanic_required
 def search_service_tickets():
     vin = request.args.get('vin')
     start_date = request.args.get('start_date')
@@ -182,7 +184,7 @@ def search_service_tickets():
 
 # ADD or Update inventory parts
 @service_tickets_bp.route('/<int:ticket_id>/add_part/<int:inventory_id>', methods=['PUT'])
-#@token_required
+@mechanic_required
 def add_update_inventory_parts(ticket_id, inventory_id):
     data = request.json
     quantity = data.get('quantity')
@@ -214,6 +216,7 @@ def add_update_inventory_parts(ticket_id, inventory_id):
 # Remove inventory parts from service ticket
 @service_tickets_bp.route('/<int:ticket_id>/remove_part/<int:inventory_id>', methods=['DELETE'])
 @limiter.limit('5 per minute; 50 per day')
+@mechanic_required
 def remove_inventory_part(ticket_id, inventory_id):
     association = db.session.query(ServiceTicketInventory).filter_by(service_ticket_id=ticket_id, inventory_id=inventory_id).first()
 
@@ -226,10 +229,15 @@ def remove_inventory_part(ticket_id, inventory_id):
 
 #List all parts (with quantity) in a service ticket
 @service_tickets_bp.route('<int:ticket_id>/parts', methods=['GET'])
-def get_service_ticket_parts(ticket_id):
+@token_required
+def get_service_ticket_parts(current_user_id, current_user_role, ticket_id):
     ticket = db.session.get(Service_Ticket, ticket_id)
     if not ticket:
         return jsonify({'error': f'Service ticket ID {ticket_id} not found.'}), 404
+
+    # RBAC: Only mechanics and the customer whom the ticket belongs to can access parts
+    if current_user_role != 'mechanic' and current_user_id != ticket.customer_id:
+        return jsonify({'error': 'Unauthorized access to service ticket parts.'}), 403
     
     parts = []
     for association in ticket.part_associations:

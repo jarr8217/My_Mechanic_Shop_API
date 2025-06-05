@@ -1,4 +1,4 @@
-from app.utils.decorators import token_required
+from app.utils.decorators import mechanic_required
 from .schemas import mechanic_schema, mechanics_schema
 from flask import request, jsonify
 from marshmallow import ValidationError
@@ -10,7 +10,8 @@ from app.extensions import limiter, cache
 # Create a mechanic
 @mechanics_bp.route('/', methods=['POST'])
 @limiter.limit("5 per minute; 50 per day")
-def create_mechanic():
+@mechanic_required
+def create_mechanic(current_user_id, current_user_role):
     try:
         mechanic_data = mechanic_schema.load(request.json)
     except ValidationError as e:
@@ -27,11 +28,13 @@ def create_mechanic():
     new_mechanic = Mechanic(**mechanic_data)
     db.session.add(new_mechanic)
     db.session.commit()
-    return jsonify(mechanic_schema.dump(new_mechanic)), 201
+    return mechanic_schema.jsonify(new_mechanic), 201
+
 
 #Get all mechanics
 @mechanics_bp.route('/', methods=['GET'])
 @cache.cached(timeout=30)
+@mechanic_required
 def get_mechanics():
     try:
         page = int(request.args.get('page', 1))
@@ -59,17 +62,18 @@ def get_mechanics():
 #Get a mechanic by ID
 @mechanics_bp.route('/<int:mechanic_id>', methods=['GET'])
 @cache.cached(timeout=30)
-@token_required
+@mechanic_required
 def get_mechanic_by_id(current_user_id, mechanic_id):
     mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:
         return jsonify({'error': 'Mechanic not found'}), 404
-    return jsonify(mechanic_schema.dump(mechanic)), 200
+    return mechanic_schema.jsonify(mechanic), 200
+
 
 #Update a mechanic
 @mechanics_bp.route('/<int:mechanic_id>', methods=['PUT'])
 @limiter.limit('5 per minute; 50 per day')
-@token_required
+@mechanic_required
 def update_mechanic(current_user_id, mechanic_id):
     mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:
@@ -83,12 +87,13 @@ def update_mechanic(current_user_id, mechanic_id):
         setattr(mechanic, key, value)
 
     db.session.commit()
-    return jsonify(mechanic_schema.dump(mechanic)), 200
+    return mechanic_schema.jsonify(mechanic), 200
+
 
 #Partial update a mechanic
 @mechanics_bp.route('/<int:mechanic_id>', methods=['PATCH'])
 @limiter.limit('5 per minute; 50 per day')
-@token_required
+@mechanic_required
 def partial_update_mechanic(current_user_id,mechanic_id):
     mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:
@@ -100,12 +105,12 @@ def partial_update_mechanic(current_user_id,mechanic_id):
     for key, value in mechanic_data.items():
         setattr(mechanic, key, value)
     db.session.commit()
-    return jsonify(mechanic_schema.dump(mechanic)), 200
+    return mechanic_schema.jsonify(mechanic), 200
 
 #Delete a mechanic
 @mechanics_bp.route('/<int:mechanic_id>', methods=['DELETE'])
 @limiter.limit('5 per minute; 50 per day')
-@token_required
+@mechanic_required
 def delete_mechanic(current_user_id, mechanic_id):
     mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:
@@ -116,11 +121,11 @@ def delete_mechanic(current_user_id, mechanic_id):
     return jsonify({'message': f'Mechanic: ID: {mechanic.id} Name: {mechanic.name} deleted successfully'}), 200
 
 
-# GET mechanics by amount of service tickets
+# GET mechanics sorted by the number of service tickets
 @mechanics_bp.route('/popular', methods=['GET'])
 @cache.cached(timeout=60)
-@token_required
-def get_popular_mechanics():
+@mechanic_required
+def get_popular_mechanics(current_user_id, current_user_role):
     query = select(Mechanic)
     mechanics = db.session.execute(query).scalars().all()
 
@@ -130,8 +135,8 @@ def get_popular_mechanics():
 
 # Get mechanics by name or email
 @mechanics_bp.route('/search', methods=['GET'])
-@token_required
-def serch_mechanic():
+@mechanic_required
+def search_mechanic(current_user_id, current_user_role):
     name = request.args.get('name')
     email = request.args.get('email')
     query = select(Mechanic)

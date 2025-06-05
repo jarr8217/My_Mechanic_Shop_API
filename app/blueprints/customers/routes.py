@@ -34,6 +34,7 @@ def create_customer():
     db.session.commit()
     return customer_schema.jsonify(new_customer), 201
 
+
 # Get all customers
 @customers_bp.route('/', methods=['GET'])
 @cache.cached(timeout=30)

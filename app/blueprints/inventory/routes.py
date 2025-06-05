@@ -5,12 +5,13 @@ from sqlalchemy import select
 from app.models import Inventory, db
 from . import inventory_bp
 from app.extensions import limiter, cache
-from app.utils.decorators import token_required
+from app.utils.decorators import mechanic_required, token_required, customer_required
 
 
 
 # Create a new inventory item
 @inventory_bp.route('/', methods=['POST'])
+@mechanic_required
 def create_inventory_item():
     try:
         inventory_data = inventory_schema.load(request.json)
@@ -35,8 +36,7 @@ def create_inventory_item():
 # Get all inventory items
 @inventory_bp.route('/', methods=['GET'])
 @cache.cached(timeout=30)
-@token_required
-def get_inventory_items(current_user_id, current_user_ro):
+def get_inventory_items():
     page = int(request.args.get('page', 1))
     limit = int(request.args.get('limit', 20))
     query = select(Inventory)
@@ -64,8 +64,8 @@ def get_inventory_item(inventory_item_id):
 # Update an inventory item
 @inventory_bp.route('/<int:inventory_item_id>', methods=['PUT'])
 @limiter.limit('5 per minute; 50 per day')
-
-def update_inventory_item( inventory_item_id):
+@mechanic_required
+def update_inventory_item(current_user_id, inventory_item_id):
     inventory_item = db.session.get(Inventory, inventory_item_id)
     if not inventory_item:
         return jsonify({'error': 'Inventory item not found'}), 404
@@ -83,8 +83,8 @@ def update_inventory_item( inventory_item_id):
 # Partial update an inventory item
 @inventory_bp.route('/<int:inventory_item_id>', methods=['PATCH'])
 @limiter.limit('5 per minute; 50 per day')
-
-def partial_update_inventory_item( inventory_item_id):
+@mechanic_required
+def partial_update_inventory_item(current_user_id, inventory_item_id):
     inventory_item = db.session.get(Inventory, inventory_item_id)
     if not inventory_item:
         return jsonify({'error': 'Inventory item not found'}), 404
@@ -102,8 +102,8 @@ def partial_update_inventory_item( inventory_item_id):
 # Delete an inventory item
 @inventory_bp.route('/<int:inventory_item_id>', methods=['DELETE'])
 @limiter.limit('5 per minute; 50 per day')
-
-def delete_inventory_item( inventory_item_id):
+@mechanic_required
+def delete_inventory_item(current_user_id, inventory_item_id):
     inventory_item = db.session.get(Inventory, inventory_item_id)
     if not inventory_item:
         return jsonify({'error': 'Inventory item not found'}), 404
