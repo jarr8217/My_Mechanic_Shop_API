@@ -1,7 +1,7 @@
 from .schemas import inventory_schema, inventories_schema
 from flask import request, jsonify
 from marshmallow import ValidationError
-from sqlalchemy import func, select
+from sqlalchemy import select
 from app.models import Inventory, db
 from . import inventory_bp
 from app.extensions import limiter, cache
@@ -35,7 +35,8 @@ def create_inventory_item():
 # Get all inventory items
 @inventory_bp.route('/', methods=['GET'])
 @cache.cached(timeout=30)
-def get_inventory_items():
+@token_required
+def get_inventory_items(current_user_id, current_user_ro):
     page = int(request.args.get('page', 1))
     limit = int(request.args.get('limit', 20))
     query = select(Inventory)

@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 from app.models import Customer, db
 from . import customers_bp
 from app.extensions import limiter, cache
-from app.utils.decorators import token_required
+from app.utils.decorators import token_required, mechanic_required, customer_required
 from werkzeug.security import generate_password_hash
 
 
@@ -37,14 +37,14 @@ def create_customer():
 # Get all customers
 @customers_bp.route('/', methods=['GET'])
 @cache.cached(timeout=30)
-def get_customers():
+@mechanic_required
+def get_customers(current_user_id, current_user_role):
     page = int(request.args.get('page', 1))
     limit = int(request.args.get('limit', 20))
     query = select(Customer)
 
     pagination = db.paginate(query, page=page, per_page=limit)
     customers = pagination.items
-    
 
     return jsonify({
         "customers": customers_schema.dump(customers),
@@ -58,20 +58,26 @@ def get_customers():
 @customers_bp.route('/<int:customer_id>', methods=['GET'])
 @cache.cached(timeout=60)
 @token_required
-def get_customer(current_user_id,customer_id):
+def get_customer(current_user_id, customer_id, current_user_role):
     customer = db.session.get(Customer, customer_id)
     if not customer:
         return jsonify({'error': 'Customer not found'}), 404
-    return customer_schema.jsonify(customer), 200
+    if current_user_role == 'mechanic' or current_user_id == customer_id:
+        return customer_schema.jsonify(customer), 200
+    return jsonify({'error': 'Unauthorized'}), 403
 
 # Update a customer
 @customers_bp.route('/<int:customer_id>', methods=['PUT'])
 @limiter.limit('5 per minute; 50 per day')
-@token_required
-def update_customer(current_user_id, customer_id):
+@customer_required
+def update_customer(current_user_id, customer_id, current_user_role):
     customer = db.session.get(Customer, customer_id)
     if not customer:
         return jsonify({'error': 'Customer not found'}), 404
+    # Check if the current user is authorized to update the customer. Customer only.
+    if current_user_role != 'customer' or current_user_id != customer_id:
+        return jsonify({'error': 'Unauthorized attempt to update customer'}), 403
+
     try:
         customer_data = customer_schema.load(request.json)
     except ValidationError as e:
@@ -86,11 +92,14 @@ def update_customer(current_user_id, customer_id):
 # Partial update a customer
 @customers_bp.route('/<int:customer_id>', methods=['PATCH'])
 @limiter.limit('5 per minute; 50 per day')
-@token_required
-def partial_update_customer(current_user_id, customer_id):
+@customer_required
+def partial_update_customer(current_user_id, customer_id, current_user_role):
     customer = db.session.get(Customer, customer_id)
     if not customer:
         return jsonify({'error': 'Customer not found'}), 404
+    # Check if the current user is authorized to update the customer. Customer only.
+    if current_user_role != 'customer' or current_user_id != customer_id:
+        return jsonify({'error': 'Unauthorized attempt to update customer'}), 403
     try:
         customer_data = customer_schema.load(request.json, partial=True)
     except ValidationError as e:
@@ -105,11 +114,14 @@ def partial_update_customer(current_user_id, customer_id):
 # Delete a customer
 @customers_bp.route('/<int:customer_id>', methods=['DELETE'])
 @limiter.limit('5 per minute; 50 per day')
-@token_required
-def delete_customer(current_user_id, customer_id):
+@customer_required
+def delete_customer(current_user_id, customer_id, current_user_role):
     customer = db.session.get(Customer, customer_id)
     if not customer:
         return jsonify({'error': 'Customer not found'}), 404
+    # Check if the current user is authorized to delete the customer. Customer only.
+    if current_user_role != 'customer' or current_user_id != customer_id:
+        return jsonify({'error': 'Unauthorized attempt to delete customer'}), 403
 
     db.session.delete(customer)
     db.session.commit()

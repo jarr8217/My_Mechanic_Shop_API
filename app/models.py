@@ -3,6 +3,7 @@ from typing import List
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Table, Column, Integer, ForeignKey
+from werkzeug.security import generate_password_hash
 
 
 
@@ -29,6 +30,9 @@ class Customer(Base):
 
     service_tickets: Mapped[List['Service_Ticket']] = db.relationship(back_populates='customer')
 
+    def hash_password(password):
+        return generate_password_hash(password)
+
 class Mechanic(Base):
     __tablename__ = 'mechanics'
 
@@ -37,8 +41,12 @@ class Mechanic(Base):
     email: Mapped[str] = mapped_column(db.String(360), unique=True, nullable=False)
     phone: Mapped[str] = mapped_column(db.String(50), nullable=False)
     salary: Mapped[float] = mapped_column(db.Float, nullable=False)
+    password: Mapped[str] = mapped_column(db.String(255), nullable=False)
 
     service_tickets: Mapped[List['Service_Ticket']] = db.relationship(secondary=mechanic_ticket, back_populates='mechanics')
+
+    def hash_password(password):
+        return generate_password_hash(password)
 
 class Service_Ticket(Base):
     __tablename__ = 'service_tickets'

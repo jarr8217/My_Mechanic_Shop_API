@@ -20,6 +20,9 @@ def create_mechanic():
     existing_mechanic = db.session.execute(query).scalars().all()
     if existing_mechanic:
         return jsonify({'error': 'Mechanic already exists'}), 400
+    
+    hashed_password = Mechanic.hash_password(mechanic_data['password'])
+    mechanic_data['password'] = hashed_password
 
     new_mechanic = Mechanic(**mechanic_data)
     db.session.add(new_mechanic)

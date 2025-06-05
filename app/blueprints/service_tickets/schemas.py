@@ -33,3 +33,4 @@ class EditServiceTicketSchema(ma.Schema):
         fields = ('add_mechanic_ids', 'remove_mechanic_ids')
 
 edit_service_ticket_schema = EditServiceTicketSchema()
+
