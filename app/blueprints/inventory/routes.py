@@ -9,10 +9,10 @@ from app.utils.decorators import mechanic_required, token_required, customer_req
 
 
 
-# Create a new inventory item
+# Create a new inventory item (RBAC: Mechanic only)
 @inventory_bp.route('/', methods=['POST'])
 @mechanic_required
-def create_inventory_item():
+def create_inventory_item(current_user_id, current_user_role):
     try:
         inventory_data = inventory_schema.load(request.json)
     except ValidationError as e:
@@ -33,7 +33,7 @@ def create_inventory_item():
     db.session.commit()
     return inventory_schema.jsonify(new_inventory_item), 201
 
-# Get all inventory items
+# Get all inventory items (Open to all)
 @inventory_bp.route('/', methods=['GET'])
 @cache.cached(timeout=30)
 def get_inventory_items():
@@ -52,7 +52,7 @@ def get_inventory_items():
         "pages": pagination.pages
     }), 200
 
-# Get an inventory item by ID
+# Get an inventory item by ID (Open to all)
 @inventory_bp.route('/<int:inventory_item_id>', methods=['GET'])
 @cache.cached(timeout=60)
 def get_inventory_item(inventory_item_id):
@@ -61,11 +61,11 @@ def get_inventory_item(inventory_item_id):
         return jsonify({'error': 'Inventory item not found'}), 404
     return inventory_schema.jsonify(inventory_item), 200
 
-# Update an inventory item
+# Update an inventory item (RBAC: Mechanic only)
 @inventory_bp.route('/<int:inventory_item_id>', methods=['PUT'])
-@limiter.limit('5 per minute; 50 per day')
 @mechanic_required
-def update_inventory_item(current_user_id, inventory_item_id):
+@limiter.limit('5 per minute; 50 per day')
+def update_inventory_item(current_user_id, current_user_role, inventory_item_id):
     inventory_item = db.session.get(Inventory, inventory_item_id)
     if not inventory_item:
         return jsonify({'error': 'Inventory item not found'}), 404
@@ -80,11 +80,12 @@ def update_inventory_item(current_user_id, inventory_item_id):
     db.session.commit()
     return inventory_schema.jsonify(inventory_item), 200
 
-# Partial update an inventory item
+# Partial update an inventory item (RBAC: Mechanic only)
+@inventory_bp.route('/<int:inventory_item_id>/partial', methods=['PATCH'])
 @inventory_bp.route('/<int:inventory_item_id>', methods=['PATCH'])
-@limiter.limit('5 per minute; 50 per day')
 @mechanic_required
-def partial_update_inventory_item(current_user_id, inventory_item_id):
+@limiter.limit('5 per minute; 50 per day')
+def partial_update_inventory_item(current_user_id, current_user_role, inventory_item_id):
     inventory_item = db.session.get(Inventory, inventory_item_id)
     if not inventory_item:
         return jsonify({'error': 'Inventory item not found'}), 404
@@ -99,11 +100,11 @@ def partial_update_inventory_item(current_user_id, inventory_item_id):
     db.session.commit()
     return jsonify(inventory_schema.dump(inventory_item)), 200
 
-# Delete an inventory item
+# Delete an inventory item (RBAC: Mechanic can delete inventory items)
 @inventory_bp.route('/<int:inventory_item_id>', methods=['DELETE'])
-@limiter.limit('5 per minute; 50 per day')
 @mechanic_required
-def delete_inventory_item(current_user_id, inventory_item_id):
+@limiter.limit('5 per minute; 50 per day')
+def delete_inventory_item(current_user_id, current_user_role, inventory_item_id):
     inventory_item = db.session.get(Inventory, inventory_item_id)
     if not inventory_item:
         return jsonify({'error': 'Inventory item not found'}), 404

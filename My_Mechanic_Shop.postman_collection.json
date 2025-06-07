@@ -19,7 +19,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"name\": \"Test User 2\",\r\n  \"email\": \"testuser2@example.com\",\r\n  \"phone\": \"123-456-7890\",\r\n  \"password\": \"strongpassword\"\r\n}\r\n",
+							"raw": "{\r\n  \"name\": \"John Doe\",\r\n  \"email\": \"john@example.com\",\r\n  \"phone\": \"555-1234\",\r\n  \"password\": \"securepassword\"\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -27,27 +27,27 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/",
+							"raw": "http://localhost:5000/customers",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "5000",
 							"path": [
-								""
+								"customers"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Login",
+					"name": "Customer login",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"email\": \"testuser2@example.com\",\r\n  \"password\": \"strongpassword\"\r\n}\r\n",
+							"raw": "{\r\n  \"email\": \"john@example.com\",\r\n  \"password\": \"securepassword\"\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -55,13 +55,14 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/login",
+							"raw": "http://localhost:5000/auth/login",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "5000",
 							"path": [
+								"auth",
 								"login"
 							]
 						}
@@ -72,7 +73,14 @@
 					"name": "Get all customers",
 					"request": {
 						"auth": {
-							"type": "noauth"
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkyMjI1MDUsImlhdCI6MTc0OTIxODkwNSwic3ViIjoiOSIsInJvbGUiOiJjdXN0b21lciJ9.2_EioxVwLP4VfvQKGnLDfg5M4WRPSK3FKZLR7fFS3J0",
+									"type": "string"
+								}
+							]
 						},
 						"method": "GET",
 						"header": [],
@@ -101,7 +109,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg2MjA2MjMsImlhdCI6MTc0ODYxNzAyMywic3ViIjoiMjEifQ.pa8V372q9l89YdSIkpaYC89GykGJYsnUnWuIvoAlons",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkyMjI1MDUsImlhdCI6MTc0OTIxODkwNSwic3ViIjoiOSIsInJvbGUiOiJjdXN0b21lciJ9.2_EioxVwLP4VfvQKGnLDfg5M4WRPSK3FKZLR7fFS3J0",
 									"type": "string"
 								}
 							]
@@ -118,14 +126,15 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/",
+							"raw": "http://localhost:5000/customers/9",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "5000",
 							"path": [
-								""
+								"customers",
+								"9"
 							]
 						}
 					},
@@ -139,7 +148,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg2NTUwNTYsImlhdCI6MTc0ODY1MTQ1Niwic3ViIjoiMjEifQ.Np0QXLeN163SUJa45l0S0Jk23oVM-k2GMIKlOFLQ2_g",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkxMzkyNzAsImlhdCI6MTc0OTEzNTY3MCwic3ViIjoiOCIsInJvbGUiOiJjdXN0b21lciJ9.mlzWxq6Es7F3-U2slKhcu9V21NlvpLduXO8rOO_1t78",
 									"type": "string"
 								}
 							]
@@ -154,7 +163,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"name\": \"Test User Updated 2\",\r\n  \"email\": \"testuser233@example.com\",\r\n  \"phone\": \"111-222-5555\",\r\n  \"password\": \"strongpassword\"\r\n}\r\n",
+							"raw": "{\r\n  \"name\": \"John Smith\",\r\n  \"email\": \"jsmith@example.com\",\r\n  \"phone\": \"555-444-4422\",\r\n  \"password\": \"securepassword\"\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -162,7 +171,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/customers/2",
+							"raw": "http://localhost:5000/customers/8",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -170,7 +179,7 @@
 							"port": "5000",
 							"path": [
 								"customers",
-								"2"
+								"8"
 							]
 						}
 					},
@@ -184,7 +193,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg1NzExOTIsImlhdCI6MTc0ODU2NzU5Miwic3ViIjoiMTgifQ.FkAoggSz_rd0TSUxcb37NB_oK4CC1hZzG_Xgv3WAPcY",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkxMzkyNzAsImlhdCI6MTc0OTEzNTY3MCwic3ViIjoiOCIsInJvbGUiOiJjdXN0b21lciJ9.mlzWxq6Es7F3-U2slKhcu9V21NlvpLduXO8rOO_1t78",
 									"type": "string"
 								}
 							]
@@ -199,17 +208,18 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"name\": \"Postman Test\"\r\n}\r\n"
+							"raw": "{\r\n  \"email\": \"JSmith@example.com\"\r\n}\r\n"
 						},
 						"url": {
-							"raw": "http://localhost:5000/",
+							"raw": "http://localhost:5000/customers/8",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "5000",
 							"path": [
-								""
+								"customers",
+								"8"
 							]
 						}
 					},
@@ -256,7 +266,14 @@
 					},
 					"request": {
 						"auth": {
-							"type": "noauth"
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkyMjI1MDUsImlhdCI6MTc0OTIxODkwNSwic3ViIjoiOSIsInJvbGUiOiJjdXN0b21lciJ9.2_EioxVwLP4VfvQKGnLDfg5M4WRPSK3FKZLR7fFS3J0",
+									"type": "string"
+								}
+							]
 						},
 						"method": "GET",
 						"header": [],
@@ -265,7 +282,7 @@
 							"raw": "{\r\n  \"name\": \"Test User 1\",\r\n  \"email\": \"testuserx@example.com\",\r\n  \"phone\": \"123-456-7890\",\r\n  \"password\": \"strongpassword\"\r\n}\r\n"
 						},
 						"url": {
-							"raw": "http://localhost:5000/customers/search?name=J",
+							"raw": "http://localhost:5000/customers/search?name=ja",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -278,37 +295,7 @@
 							"query": [
 								{
 									"key": "name",
-									"value": "J"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Pagination",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:5000/customers/search?page=1&limit=20",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "5000",
-							"path": [
-								"customers",
-								"search"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "limit",
-									"value": "20"
+									"value": "ja"
 								}
 							]
 						}
@@ -318,10 +305,20 @@
 				{
 					"name": "Query by email",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkyMjI5NTYsImlhdCI6MTc0OTIxOTM1Niwic3ViIjoiOSIsInJvbGUiOiJjdXN0b21lciJ9.1--kviBT3GX9A2nL8pL4lTIs2AR8JF0w0-iA5PQB6S4",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/customers/search?email=ka",
+							"raw": "http://localhost:5000/customers/search?email=Jo",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -334,7 +331,51 @@
 							"query": [
 								{
 									"key": "email",
-									"value": "ka"
+									"value": "Jo"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pagination",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkyMjI1MDUsImlhdCI6MTc0OTIxODkwNSwic3ViIjoiOSIsInJvbGUiOiJjdXN0b21lciJ9.2_EioxVwLP4VfvQKGnLDfg5M4WRPSK3FKZLR7fFS3J0",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/customers/search?name=John&page=1&limit=20",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"customers",
+								"search"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "John"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
 								}
 							]
 						}
@@ -362,7 +403,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"name\": \"Mike Wrench\",\r\n  \"email\": \"mike.wrench@example.com\",\r\n  \"phone\": \"555-987-6543\",\r\n  \"salary\": 50000.0\r\n}\r\n",
+							"raw": "{\r\n  \"name\": \"Maria Lugnut 2\",\r\n  \"email\": \"maria.lugnut2@example.com\",\r\n  \"phone\": \"555-444-1122\",\r\n  \"salary\": 58000.0,\r\n  \"password\": \"securepass\"\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -384,6 +425,35 @@
 					"response": []
 				},
 				{
+					"name": "Mechanic login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"maria.lugnut2@example.com\",\r\n  \"password\": \"securepass\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/auth/mechanic_login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"auth",
+								"mechanic_login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Get all mechanics",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
@@ -394,7 +464,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg4MzA3NjcsImlhdCI6MTc0ODgyNzE2Nywic3ViIjoiMSJ9.eCsY_RKD89vqGuMF-laWJ4ptohfvbMHl3euHNOsH-zk",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkyMjMwNzAsImlhdCI6MTc0OTIxOTQ3MCwic3ViIjoiOSIsInJvbGUiOiJjdXN0b21lciJ9.jH_qLNmAaF_v7FzMvbplmA10kqkX_hYADqtSalt8_hI",
 									"type": "string"
 								}
 							]
@@ -403,7 +473,12 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": ""
+							"raw": "{\r\n    \"email\": \"MWrench@example.com\",\r\n    \"passwaord\": \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
 							"raw": "http://localhost:5000/mechanics",
@@ -430,7 +505,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg1NzM0NDYsImlhdCI6MTc0ODU2OTg0Niwic3ViIjoiMjAifQ.fXjfJFNpE0n0czqDcqEwss0Vve24qr1_PVhhhPXVpRo",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkyMjMwNzAsImlhdCI6MTc0OTIxOTQ3MCwic3ViIjoiOSIsInJvbGUiOiJjdXN0b21lciJ9.jH_qLNmAaF_v7FzMvbplmA10kqkX_hYADqtSalt8_hI",
 									"type": "string"
 								}
 							]
@@ -448,7 +523,7 @@
 							"raw": "{\r\n  \"email\": \"newemail@example.com\",\r\n  \"salary\": 75000\r\n}\r\n"
 						},
 						"url": {
-							"raw": "http://localhost:5000/mechanics/13",
+							"raw": "http://localhost:5000/mechanics/12",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -456,7 +531,7 @@
 							"port": "5000",
 							"path": [
 								"mechanics",
-								"13"
+								"12"
 							]
 						}
 					},
@@ -554,7 +629,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg1NzM0NDYsImlhdCI6MTc0ODU2OTg0Niwic3ViIjoiMjAifQ.fXjfJFNpE0n0czqDcqEwss0Vve24qr1_PVhhhPXVpRo",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg4MzIwOTQsImlhdCI6MTc0ODgyODQ5NCwic3ViIjoiMSJ9.OyN0uywW-f0okw_9ZV1ariLJwqgs4udBoTbkOerqrKw",
 									"type": "string"
 								}
 							]
@@ -562,7 +637,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/mechanics/1",
+							"raw": "http://localhost:5000/mechanics/8",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -570,7 +645,7 @@
 							"port": "5000",
 							"path": [
 								"mechanics",
-								"1"
+								"8"
 							]
 						}
 					},
@@ -578,16 +653,13 @@
 				},
 				{
 					"name": "Popular",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
 						"auth": {
 							"type": "bearer",
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg1NzM0NDYsImlhdCI6MTc0ODU2OTg0Niwic3ViIjoiMjAifQ.fXjfJFNpE0n0czqDcqEwss0Vve24qr1_PVhhhPXVpRo",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkzNDAyOTEsImlhdCI6MTc0OTMzNjY5MSwic3ViIjoiOSIsInJvbGUiOiJjdXN0b21lciJ9.b9rWM12ml3pWrEGt0WSqNx-YgRK1y3lyy5vruCsAxu4",
 									"type": "string"
 								}
 							]
@@ -600,10 +672,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n  \"email\": \"newemail@example.com\",\r\n  \"salary\": 75000\r\n}\r\n"
-						},
 						"url": {
 							"raw": "http://localhost:5000/mechanics/popular",
 							"protocol": "http",
@@ -626,7 +694,14 @@
 					},
 					"request": {
 						"auth": {
-							"type": "noauth"
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkyMjMwNzAsImlhdCI6MTc0OTIxOTQ3MCwic3ViIjoiOSIsInJvbGUiOiJjdXN0b21lciJ9.jH_qLNmAaF_v7FzMvbplmA10kqkX_hYADqtSalt8_hI",
+									"type": "string"
+								}
+							]
 						},
 						"method": "GET",
 						"header": [],
@@ -635,7 +710,7 @@
 							"raw": "{\r\n  \"name\": \"Test User 1\",\r\n  \"email\": \"testuserx@example.com\",\r\n  \"phone\": \"123-456-7890\",\r\n  \"password\": \"strongpassword\"\r\n}\r\n"
 						},
 						"url": {
-							"raw": "http://localhost:5000/mechanics/search?name=mike",
+							"raw": "http://localhost:5000/mechanics/search?name=derek",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -648,7 +723,7 @@
 							"query": [
 								{
 									"key": "name",
-									"value": "mike"
+									"value": "derek"
 								}
 							]
 						}
@@ -658,10 +733,20 @@
 				{
 					"name": "Query by email",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkzNDAyOTEsImlhdCI6MTc0OTMzNjY5MSwic3ViIjoiOSIsInJvbGUiOiJjdXN0b21lciJ9.b9rWM12ml3pWrEGt0WSqNx-YgRK1y3lyy5vruCsAxu4",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/mechanics/search?email=mike",
+							"raw": "http://localhost:5000/mechanics/search?email=ke",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -674,7 +759,7 @@
 							"query": [
 								{
 									"key": "email",
-									"value": "mike"
+									"value": "ke"
 								}
 							]
 						}
@@ -684,6 +769,16 @@
 				{
 					"name": "Pagination",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkzNDAyOTEsImlhdCI6MTc0OTMzNjY5MSwic3ViIjoiOSIsInJvbGUiOiJjdXN0b21lciJ9.b9rWM12ml3pWrEGt0WSqNx-YgRK1y3lyy5vruCsAxu4",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -724,7 +819,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg4MzA3NjcsImlhdCI6MTc0ODgyNzE2Nywic3ViIjoiMSJ9.eCsY_RKD89vqGuMF-laWJ4ptohfvbMHl3euHNOsH-zk",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkzNDEwNDEsImlhdCI6MTc0OTMzNzQ0MSwic3ViIjoiMTIiLCJyb2xlIjoibWVjaGFuaWMifQ.0OCNkTRSuCa28U6M0ITRQ_DboXAW508n3SUI7GVvBJY",
 									"type": "string"
 								}
 							]
@@ -739,7 +834,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"VIN\": \"1HGCM82633A004352\",\r\n  \"service_desc\": \"Car makes a strange noise.\",\r\n  \"service_date\": \"2025-06-02\"\r\n}\r\n"
+							"raw": "{\r\n  \"VIN\": \"1FTSW21R08EC55555\",\r\n  \"service_desc\": \"Oil change\",\r\n  \"service_date\": \"2025-06-06\",\r\n  \"customer_id\": 1\r\n}\r\n"
 						},
 						"url": {
 							"raw": "http://localhost:5000/service_tickets",
@@ -766,7 +861,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg4MzA3NjcsImlhdCI6MTc0ODgyNzE2Nywic3ViIjoiMSJ9.eCsY_RKD89vqGuMF-laWJ4ptohfvbMHl3euHNOsH-zk",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkzNDEwNDEsImlhdCI6MTc0OTMzNzQ0MSwic3ViIjoiMTIiLCJyb2xlIjoibWVjaGFuaWMifQ.0OCNkTRSuCa28U6M0ITRQ_DboXAW508n3SUI7GVvBJY",
 									"type": "string"
 								}
 							]
@@ -784,7 +879,7 @@
 							"raw": "{\r\n  \"VIN\": \"RACEVIN003\",\r\n  \"service_date\": \"2025-05-23\",\r\n  \"service_desc\": \"Install titanium cat-back exhaust and flash ECU with race performance map\",\r\n  \"customer_id\": 3\r\n}\r\n\r\n"
 						},
 						"url": {
-							"raw": "http://localhost:5000/service_tickets/1",
+							"raw": "http://localhost:5000/service_tickets/6",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -792,7 +887,7 @@
 							"port": "5000",
 							"path": [
 								"service_tickets",
-								"1"
+								"6"
 							]
 						}
 					},
@@ -809,7 +904,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg1NzM0NDYsImlhdCI6MTc0ODU2OTg0Niwic3ViIjoiMjAifQ.fXjfJFNpE0n0czqDcqEwss0Vve24qr1_PVhhhPXVpRo",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkzNDEwNDEsImlhdCI6MTc0OTMzNzQ0MSwic3ViIjoiMTIiLCJyb2xlIjoibWVjaGFuaWMifQ.0OCNkTRSuCa28U6M0ITRQ_DboXAW508n3SUI7GVvBJY",
 									"type": "string"
 								}
 							]
@@ -827,15 +922,14 @@
 							"raw": "{\r\n  \"VIN\": \"RACEVIN003\",\r\n  \"service_date\": \"2025-05-23\",\r\n  \"service_desc\": \"Install titanium cat-back exhaust and flash ECU with race performance map\",\r\n  \"customer_id\": 3\r\n}\r\n\r\n"
 						},
 						"url": {
-							"raw": "http://localhost:5000/service_tickets/",
+							"raw": "http://localhost:5000/service_tickets",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "5000",
 							"path": [
-								"service_tickets",
-								""
+								"service_tickets"
 							]
 						}
 					},
@@ -849,7 +943,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg4MzA3NjcsImlhdCI6MTc0ODgyNzE2Nywic3ViIjoiMSJ9.eCsY_RKD89vqGuMF-laWJ4ptohfvbMHl3euHNOsH-zk",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkzNDEwNDEsImlhdCI6MTc0OTMzNzQ0MSwic3ViIjoiMTIiLCJyb2xlIjoibWVjaGFuaWMifQ.0OCNkTRSuCa28U6M0ITRQ_DboXAW508n3SUI7GVvBJY",
 									"type": "string"
 								}
 							]
@@ -864,10 +958,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"add_mechanic_ids\": [1],\r\n  \"remove_mechanic_ids\": []\r\n}\r\n\r\n"
+							"raw": "{\r\n  \"add_mechanic_ids\": [],\r\n  \"remove_mechanic_ids\": [10]\r\n}\r\n\r\n"
 						},
 						"url": {
-							"raw": "http://localhost:5000/service_tickets/edit/1",
+							"raw": "http://localhost:5000/service_tickets/edit/6",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -876,7 +970,7 @@
 							"path": [
 								"service_tickets",
 								"edit",
-								"1"
+								"6"
 							]
 						}
 					},
@@ -893,7 +987,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDg4MzE1NjksImlhdCI6MTc0ODgyNzk2OSwic3ViIjoiMSJ9.fIef6XtBX4BOxPY0GPILEREIJ1ljAS2QusHoQyE8rLk",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkzNDAyOTEsImlhdCI6MTc0OTMzNjY5MSwic3ViIjoiOSIsInJvbGUiOiJjdXN0b21lciJ9.b9rWM12ml3pWrEGt0WSqNx-YgRK1y3lyy5vruCsAxu4",
 									"type": "string"
 								}
 							]
@@ -910,7 +1004,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/service_tickets/1",
+							"raw": "http://localhost:5000/service_tickets/3",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -918,7 +1012,7 @@
 							"port": "5000",
 							"path": [
 								"service_tickets",
-								"1"
+								"3"
 							]
 						}
 					},
@@ -927,10 +1021,20 @@
 				{
 					"name": "service ticket by vin or date",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkzNDEwNDEsImlhdCI6MTc0OTMzNzQ0MSwic3ViIjoiMTIiLCJyb2xlIjoibWVjaGFuaWMifQ.0OCNkTRSuCa28U6M0ITRQ_DboXAW508n3SUI7GVvBJY",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/service_tickets/search?datetime=1h",
+							"raw": "http://localhost:5000/service_tickets/search?vin=1FTS",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -942,9 +1046,329 @@
 							],
 							"query": [
 								{
-									"key": "datetime",
-									"value": "1h"
+									"key": "vin",
+									"value": "1FTS"
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add/update ticket part",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkzNDEwNDEsImlhdCI6MTc0OTMzNzQ0MSwic3ViIjoiMTIiLCJyb2xlIjoibWVjaGFuaWMifQ.0OCNkTRSuCa28U6M0ITRQ_DboXAW508n3SUI7GVvBJY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"quantity\": 3\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:5000/service_tickets/2/add_part/2",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "5000",
+							"path": [
+								"service_tickets",
+								"2",
+								"add_part",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Service ticket parts",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkzNDEwNDEsImlhdCI6MTc0OTMzNzQ0MSwic3ViIjoiMTIiLCJyb2xlIjoibWVjaGFuaWMifQ.0OCNkTRSuCa28U6M0ITRQ_DboXAW508n3SUI7GVvBJY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://127.0.0.1:5000/service_tickets/2/parts",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "5000",
+							"path": [
+								"service_tickets",
+								"2",
+								"parts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete ticket parts",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkzNDEwNDEsImlhdCI6MTc0OTMzNzQ0MSwic3ViIjoiMTIiLCJyb2xlIjoibWVjaGFuaWMifQ.0OCNkTRSuCa28U6M0ITRQ_DboXAW508n3SUI7GVvBJY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/service_tickets/2/remove_part/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"service_tickets",
+								"2",
+								"remove_part",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Inventory",
+			"item": [
+				{
+					"name": "Create inventory",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkzNDEwNDEsImlhdCI6MTc0OTMzNzQ0MSwic3ViIjoiMTIiLCJyb2xlIjoibWVjaGFuaWMifQ.0OCNkTRSuCa28U6M0ITRQ_DboXAW508n3SUI7GVvBJY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"part_name\": \"Goodyear Tires\",\r\n  \"part_number\": \"GYT71635\",\r\n  \"quantity\": 20,\r\n  \"price\": 79.95\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/inventory",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"inventory"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get inventory",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"part_name\": \"Brake Fluid DOT 4\",\r\n  \"part_number\": \"BRK-FLUID-DOT4\",\r\n  \"quantity\": 60,\r\n  \"price\": 8.49\r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://localhost:5000/inventory",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"inventory"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get inventory by id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"part_name\": \"Brake Fluid DOT 4\",\r\n  \"part_number\": \"BRK-FLUID-DOT4\",\r\n  \"quantity\": 60,\r\n  \"price\": 8.49\r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://localhost:5000/inventory/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"inventory",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update inventory",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"part_name\": \"Brake Fluid\",\r\n  \"part_number\": \"BRK-FLUID-DOT5\"\r\n\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/inventory/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"inventory",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Partial update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkzNDEwNDEsImlhdCI6MTc0OTMzNzQ0MSwic3ViIjoiMTIiLCJyb2xlIjoibWVjaGFuaWMifQ.0OCNkTRSuCa28U6M0ITRQ_DboXAW508n3SUI7GVvBJY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"part_name\": \"Brake Fluid\",\r\n  \"part_number\": \"BRK-FLUID-DOT5\"\r\n\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/inventory/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"inventory",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete inventory",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDkzNDM3ODIsImlhdCI6MTc0OTM0MDE4Miwic3ViIjoiMTIiLCJyb2xlIjoibWVjaGFuaWMifQ.FmxxVsZ7GfeMM2m0e31A17mrNNHdH3bWSHpmGslddYs",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"part_name\": \"Brake Fluid\",\r\n  \"part_number\": \"BRK-FLUID-DOT5\"\r\n\r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://localhost:5000/inventory/10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"inventory",
+								"10"
 							]
 						}
 					},

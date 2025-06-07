@@ -9,7 +9,7 @@ from app.utils.decorators import token_required, mechanic_required, customer_req
 from werkzeug.security import generate_password_hash
 
 
-# Create a new customer
+# Create a new customer (open to all)
 @customers_bp.route('/', methods=['POST'])
 def create_customer():
     try:
@@ -17,7 +17,7 @@ def create_customer():
     except ValidationError as e:
         return jsonify(e.messages), 400
 
-    query = select(Customer).where(Customer.email == customer_data['email'], Customer.password == customer_data['password'])
+    query = select(Customer).where(Customer.email == customer_data['email'])
     existing_customer = db.session.execute(query).scalars().all()
     if existing_customer:
         return jsonify({'error': "Email already exists"}), 400
@@ -35,10 +35,10 @@ def create_customer():
     return customer_schema.jsonify(new_customer), 201
 
 
-# Get all customers
+# Get all customers (RBAC: Mechanic only)
 @customers_bp.route('/', methods=['GET'])
+@token_required
 @cache.cached(timeout=30)
-@mechanic_required
 def get_customers(current_user_id, current_user_role):
     page = int(request.args.get('page', 1))
     limit = int(request.args.get('limit', 20))
@@ -55,22 +55,23 @@ def get_customers(current_user_id, current_user_role):
         "pages": pagination.pages
     }), 200
 
-# Get a customer by ID
+# Get a customer by ID (RBAC: Mechanic and Customer can access their own data)
 @customers_bp.route('/<int:customer_id>', methods=['GET'])
-@cache.cached(timeout=60)
 @token_required
+@cache.cached(timeout=30)
 def get_customer(current_user_id, customer_id, current_user_role):
     customer = db.session.get(Customer, customer_id)
     if not customer:
         return jsonify({'error': 'Customer not found'}), 404
+    print(f"current_user_id: {current_user_id} ({type(current_user_id)}) | customer_id: {customer_id} ({type(customer_id)}) | role: {current_user_role}")
     if current_user_role == 'mechanic' or current_user_id == customer_id:
         return customer_schema.jsonify(customer), 200
     return jsonify({'error': 'Unauthorized'}), 403
 
-# Update a customer
+# Update a customer (RBAC: Customer can update their own data)
 @customers_bp.route('/<int:customer_id>', methods=['PUT'])
-@limiter.limit('5 per minute; 50 per day')
 @customer_required
+@limiter.limit('5 per minute; 50 per day')
 def update_customer(current_user_id, customer_id, current_user_role):
     customer = db.session.get(Customer, customer_id)
     if not customer:
@@ -90,10 +91,11 @@ def update_customer(current_user_id, customer_id, current_user_role):
     db.session.commit()
     return customer_schema.jsonify(customer), 200
 
-# Partial update a customer
+
+# Partial update a customer (RBAC: Customer can partially update their own data)
 @customers_bp.route('/<int:customer_id>', methods=['PATCH'])
-@limiter.limit('5 per minute; 50 per day')
 @customer_required
+@limiter.limit('5 per minute; 50 per day')
 def partial_update_customer(current_user_id, customer_id, current_user_role):
     customer = db.session.get(Customer, customer_id)
     if not customer:
@@ -110,12 +112,13 @@ def partial_update_customer(current_user_id, customer_id, current_user_role):
         setattr(customer, key, value)
 
     db.session.commit()
-    return jsonify(customer_schema.dump(customer)), 200
+    return customer_schema.jsonify(customer), 200
 
-# Delete a customer
+
+# Delete a customer (RBAC: Customer can delete their own data)
 @customers_bp.route('/<int:customer_id>', methods=['DELETE'])
-@limiter.limit('5 per minute; 50 per day')
 @customer_required
+@limiter.limit('5 per minute; 50 per day')
 def delete_customer(current_user_id, customer_id, current_user_role):
     customer = db.session.get(Customer, customer_id)
     if not customer:
@@ -128,10 +131,10 @@ def delete_customer(current_user_id, customer_id, current_user_role):
     db.session.commit()
     return jsonify({'message': f'Customer: {customer_id}, successfully deleted!'}), 200
 
-# Get customers by search criteria
+# Get customers by search criteria (name or email)
 @customers_bp.route('/search', methods=['GET'])
 @token_required
-def search_customers():
+def search_customers(current_user_id, current_user_role):
     name = request.args.get('name')
     email = request.args.get('email')
     query = select(Customer)
@@ -147,6 +150,7 @@ def search_customers():
     if not customers:
         return jsonify({'message': 'No customers found matching the criteria'}), 404
     
-    return jsonify(customers_schema.dump(customers)), 200
+    return customer_schema.jsonify(customers, many=True), 200
+
 
 

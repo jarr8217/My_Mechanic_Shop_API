@@ -1,4 +1,4 @@
-from app.utils.decorators import mechanic_required, token_required
+from app.utils.decorators import customer_required, mechanic_required, token_required
 from .schemas import service_ticket_schema, service_tickets_schema, edit_service_ticket_schema, return_service_ticket_schema
 from flask import request, jsonify
 from marshmallow import ValidationError
@@ -16,19 +16,29 @@ from flask import request, jsonify
 
 #Create service_ticket
 @service_tickets_bp.route('/', methods=['POST'])
-@limiter.limit("5 per minute; 50 per day")
-@token_required
-def create_service_ticket(customer_id):
+@mechanic_required
+@limiter.limit('5 per minute; 50 per day')
+def create_service_ticket(current_user_id, current_user_role):
+    if current_user_role != 'mechanic':
+        return jsonify({'error': 'Only mechanics can create service tickets'}), 403
+    
     try:
         ticket_data = request.json
+        customer_id = ticket_data.get('customer_id')
+        if not customer_id:
+            return jsonify({'error': 'Customer ID is required'}), 400
+        
+
+        customer = db.session.get(Customer, customer_id)
+        if not customer:
+            return jsonify({'error': 'Customer not found'}), 404
+        
         ticket_data['customer_id'] = customer_id
         service_ticket = service_ticket_schema.load(ticket_data)
     except ValidationError as e:
         return jsonify(e.messages), 400
 
-    if not customer_id or not db.session.get(Customer, customer_id):
-        return jsonify({'error': 'Missing or invalid customer ID'}), 400
-
+    # Check if the VIN already exists
     query = select(Service_Ticket).where(Service_Ticket.VIN == service_ticket.VIN)
     existing_service_ticket = db.session.execute(query).scalars().all()
     if existing_service_ticket:
@@ -41,8 +51,9 @@ def create_service_ticket(customer_id):
 
 #Get all service_tickets
 @service_tickets_bp.route('/', methods=['GET'])
+@mechanic_required
 @cache.cached(timeout=30)
-def get_service_tickets():
+def get_service_tickets(current_user_id, current_user_role):
     try:
         page = int(request.args.get('page', 1))
         limit = int(request.args.get('limit', 20))
@@ -74,9 +85,9 @@ def get_service_tickets():
 
 # Get service_ticket by id
 @service_tickets_bp.route('/<int:ticket_id>', methods=['GET'])
-@cache.cached(timeout=30)
 @token_required
-def get_service_ticket(current_user_id, ticket_id):
+@cache.cached(timeout=30)
+def get_service_ticket(current_user_id, ticket_id, current_user_role):
     service_ticket = db.session.get(Service_Ticket, ticket_id)
     if not service_ticket:
         return jsonify({'error': 'Service ticket not found.'}), 404
@@ -84,8 +95,10 @@ def get_service_ticket(current_user_id, ticket_id):
 
 # Get all service tickets for a customer
 @service_tickets_bp.route('/my-tickets', methods=['GET'])
-@token_required
-def get_customer_service_tickets(current_user_id):
+@customer_required
+def get_customer_service_tickets(current_user_id, current_user_role):
+    if current_user_role != 'customer':
+        return jsonify({'error': 'Only customers can access their service tickets'}), 403
     query = select(Service_Ticket).where(Service_Ticket.customer_id == current_user_id)
     service_ticket = db.session.execute(query).scalars().all()
 
@@ -141,9 +154,9 @@ def edit_service_ticket(current_user_id, current_user_role, ticket_id):
 
 # Search service tickets
 @service_tickets_bp.route('/search', methods=['GET'])
-@cache.cached(timeout=30)
 @mechanic_required
-def search_service_tickets():
+@cache.cached(timeout=30)
+def search_service_tickets(current_user_id, current_user_role):
     vin = request.args.get('vin')
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
@@ -185,7 +198,7 @@ def search_service_tickets():
 # ADD or Update inventory parts
 @service_tickets_bp.route('/<int:ticket_id>/add_part/<int:inventory_id>', methods=['PUT'])
 @mechanic_required
-def add_update_inventory_parts(ticket_id, inventory_id):
+def add_update_inventory_parts(current_user_id, current_user_role, ticket_id, inventory_id):
     data = request.json
     quantity = data.get('quantity')
 
@@ -217,7 +230,7 @@ def add_update_inventory_parts(ticket_id, inventory_id):
 @service_tickets_bp.route('/<int:ticket_id>/remove_part/<int:inventory_id>', methods=['DELETE'])
 @limiter.limit('5 per minute; 50 per day')
 @mechanic_required
-def remove_inventory_part(ticket_id, inventory_id):
+def remove_inventory_part(current_user_id, current_user_role, ticket_id, inventory_id):
     association = db.session.query(ServiceTicketInventory).filter_by(service_ticket_id=ticket_id, inventory_id=inventory_id).first()
 
     if not association:
