@@ -7,9 +7,8 @@ from app.models import Mechanic, db
 from . import mechanics_bp
 from app.extensions import limiter, cache
 
-# Create a mechanic (RBAC: Mechanic only)
+# Create a mechanic
 @mechanics_bp.route('/', methods=['POST'])
-@mechanic_required
 @limiter.limit("5 per minute; 50 per day")
 def create_mechanic():
     try:
@@ -53,9 +52,9 @@ def get_mechanics(current_user_id, current_user_role):
         return jsonify({'message': 'No mechanics found'}), 404
     
     if current_user_role == 'mechanic':
-        mechanics = mechanic_customer_view_schema.dump(mechanics)
+        mechanics = mechanic_customer_view_schema.dump(mechanics, many=True)
     elif current_user_role == 'customer':
-        mechanics = mechanic_customer_view_schema_many.dump(mechanics)
+        mechanics = mechanic_customer_view_schema.dump(mechanics, many=True)
     else: 
         return jsonify({'error': 'Access denied'}), 403
 
