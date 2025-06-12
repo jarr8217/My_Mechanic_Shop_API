@@ -1,0 +1,378 @@
+swagger: "2.0"
+info:
+  title: "My Mechanic Shop API"
+  description: "API for managing customers, orders, and services at mechanic shop"
+  version: "1.0.0"
+host: "127.0.0.1:5000"
+schemes:
+  - "http"
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+
+securityDefinitions:
+  bearerAuth:
+    type: "apiKey"
+    name: "Authorization"
+    in: "header"
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - "Authentication"
+      summary: "Login for customers"
+      description: "Allows customers to log into their accounts"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Login credentials for the customer"
+          required: true
+          schema:
+            $ref: "#/definitions/LoginCredentials"
+      responses:
+        '200':
+          description: "Login successful"
+          schema:
+            $ref: "#/definitions/LoginResponse"
+        '400':
+          description: "Invalid credentials"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        '500':
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+  /customers:
+    post:
+      tags:
+        - "Customers"
+      summary: "Register a new customer"
+      description: "Endpoint to register new customers. Requires customer details such as name, email, phone, and password."
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Customer registration data"
+          required: true
+          schema:
+            $ref: "#/definitions/Customer"
+      responses:
+        '201':
+          description: "Customer created successfully"
+          schema:
+            $ref: "#/definitions/CustomerResponse"
+        '400':
+          description: "Invalid input or email already exists"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        '500':
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+    get:
+      tags:
+        - "Customers"
+      summary: "Get all customers"
+      description: "Retrieve a paginated list of all customers (mechanic only)."
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: "Page number (default 1)"
+          required: false
+          type: integer
+        - name: limit
+          in: query
+          description: "Number of results per page (default 20)"
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: "List of customers"
+          schema:
+            $ref: "#/definitions/PaginatedCustomersResponse"
+        '400':
+          description: "Invalid request"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        '403':
+          description: "Forbidden"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        '500':
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+  /customers/{customer_id}:
+    get:
+      tags:
+        - "Customers"
+      summary: "Get a customer by ID"
+      description: "Mechanic or the customer themselves can get customer info."
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: customer_id
+          in: path
+          required: true
+          type: integer
+          description: "Customer ID"
+      responses:
+        '200':
+          description: "Customer found"
+          schema:
+            $ref: "#/definitions/CustomerResponse"
+        '403':
+          description: "Forbidden"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        '404':
+          description: "Customer not found"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+    put:
+      tags:
+        - "Customers"
+      summary: "Update a customer"
+      description: "Customer can update their own data"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: customer_id
+          in: path
+          required: true
+          type: integer
+          description: "Customer ID"
+        - in: body
+          name: body
+          description: "Updated customer data"
+          required: true
+          schema:
+            $ref: "#/definitions/Customer"
+      responses:
+        '200':
+          description: "Customer updated"
+          schema:
+            $ref: "#/definitions/CustomerResponse"
+        '400':
+          description: "Invalid input"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        '403':
+          description: "Unauthorized"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        '404':
+          description: "Customer not found"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+    patch:
+      tags:
+        - "Customers"
+      summary: "Partially update a customer"
+      description: "Customer can partially update their own data"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: customer_id
+          in: path
+          required: true
+          type: integer
+          description: "Customer ID"
+        - in: body
+          name: body
+          description: "Partial customer data"
+          required: true
+          schema:
+            $ref: "#/definitions/Customer"
+      responses:
+        '200':
+          description: "Customer updated"
+          schema:
+            $ref: "#/definitions/CustomerResponse"
+        '400':
+          description: "Invalid input"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        '403':
+          description: "Unauthorized"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        '404':
+          description: "Customer not found"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+    delete:
+      tags:
+        - "Customers"
+      summary: "Delete a customer"
+      description: "Customer can delete their own data"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: customer_id
+          in: path
+          required: true
+          type: integer
+          description: "Customer ID"
+      responses:
+        '200':
+          description: "Customer deleted"
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Customer: 101, successfully deleted!"
+        '403':
+          description: "Unauthorized"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        '404':
+          description: "Customer not found"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+  /customers/search:
+    get:
+      tags:
+        - "Customers"
+      summary: "Search customers"
+      description: "Search for customers by name or email"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: name
+          in: query
+          description: "Customer name (optional)"
+          required: false
+          type: string
+        - name: email
+          in: query
+          description: "Customer email (optional)"
+          required: false
+          type: string
+      responses:
+        '200':
+          description: "Customers found"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CustomerResponse"
+        '400':
+          description: "Invalid search criteria"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        '404':
+          description: "No customers found"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+definitions:
+  LoginCredentials:
+    type: object
+    required:
+      - email
+      - password
+    properties:
+      email:
+        type: string
+        format: email
+        example: "user@example.com"
+      password:
+        type: string
+        example: "password123"
+
+  LoginResponse:
+    type: object
+    properties:
+      status:
+        type: string
+        example: "Login successful"
+      token:
+        type: string
+      user:
+        type: object
+        properties:
+          id:
+            type: integer
+            example: 123
+          email:
+            type: string
+            example: "email@example.com"
+          role:
+            type: string
+            example: "customer"
+
+  Customer:
+    type: object
+    required:
+      - name
+      - email
+      - phone
+      - password
+    properties:
+      name:
+        type: string
+        example: "John Doe"
+      email:
+        type: string
+        format: email
+        example: "john@example.com"
+      phone:
+        type: string
+        example: "555-1234"
+      password:
+        type: string
+        example: "mysecretpassword"
+
+  CustomerResponse:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 101
+      name:
+        type: string
+        example: "John Doe"
+      email:
+        type: string
+        example: "john@example.com"
+      phone:
+        type: string
+        example: "555-1234"
+
+  PaginatedCustomersResponse:
+    type: object
+    properties:
+      customers:
+        type: array
+        items:
+          $ref: "#/definitions/CustomerResponse"
+      page:
+        type: integer
+        example: 1
+      per_page:
+        type: integer
+        example: 20
+      total:
+        type: integer
+        example: 123
+      pages:
+        type: integer
+        example: 7
+
+  ErrorResponse:
+    type: object
+    properties:
+      error:
+        type: string
+        example: "Invalid email or password"
