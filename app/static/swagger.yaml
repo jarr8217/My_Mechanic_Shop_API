@@ -22,7 +22,7 @@ paths:
     post:
       tags:
         - "Authentication"
-      summary: "Login for customers"
+      summary: "Login endpoint (Generates JWT Token)"
       description: "Allows customers to log into their accounts"
       parameters:
         - in: "body"
@@ -271,6 +271,12 @@ paths:
           description: "Invalid search criteria"
           schema:
             $ref: "#/definitions/ErrorResponse"
+            example: "Invalid search criteria"
+        '403':
+          description: "Forbidden"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+            example: "Unauthorized access"
         '404':
           description: "No customers found"
           schema:
@@ -376,3 +382,46 @@ definitions:
       error:
         type: string
         example: "Invalid email or password"
+
+  CustomerPartialUpdate:
+    type: object
+    properties:
+      name:
+        type: string
+        example: "John Doe"
+      email:
+        type: string
+        format: email
+        example: "john@example.com"
+      phone:
+        type: string
+        example: "555-1234"
+  
+  CustomerDeleteResponse:
+    type: object
+    properties:
+      message:
+        type: string
+        example: "Customer: 101, successfully deleted!"
+
+  CustomerSearchResponse:
+    type: object
+    properties:
+      customers:
+        type: array
+        items:
+          $ref: "#/definitions/CustomerResponse"
+      total:
+        type: integer
+        example: 2
+      page:
+        type: integer
+        example: 1
+      per_page:
+        type: integer
+        example: 20
+      pages:
+        type: integer
+        example: 1
+
+  
