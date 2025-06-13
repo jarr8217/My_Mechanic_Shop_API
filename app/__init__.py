@@ -7,13 +7,18 @@ from .blueprints.service_tickets import service_tickets_bp
 from .blueprints.inventory import inventory_bp
 from dotenv import load_dotenv
 from .blueprints.auth import auth_bp
-
+from flask_swagger_ui import get_swaggerui_blueprint
+from flask_cors import CORS
 
 load_dotenv()
+
 
 def create_app(config_name):
     app = Flask(__name__)
     app.config.from_object(f'config.{config_name}')
+
+    # Enable CORS for all routes
+    CORS(app)
 
     #initialize extensions
     ma.init_app(app)
@@ -21,11 +26,23 @@ def create_app(config_name):
     limiter.init_app(app)
     cache.init_app(app)
     
+    # Swagger UI setup
+    SWAGGER_URL = '/api/docs'
+    API_URL = '/static/swagger.yaml'
+    swaggerui_blueprint = get_swaggerui_blueprint(
+        SWAGGER_URL,
+        API_URL,
+        config={
+            "app_name": "My Mechanic Shop API"
+        }
+    )
+
     #register Blueprints
     app.register_blueprint(customers_bp, url_prefix='/customers')
     app.register_blueprint(mechanics_bp, url_prefix='/mechanics')
     app.register_blueprint(service_tickets_bp, url_prefix='/service_tickets')
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(inventory_bp, url_prefix='/inventory')
+    app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
     return app
