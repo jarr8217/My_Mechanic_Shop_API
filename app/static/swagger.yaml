@@ -18,36 +18,55 @@ securityDefinitions:
     name: "Authorization"
     in: "header"
 
-# ==========================
-#         PATHS
-# ==========================
+# ========= PATHS  =========
 paths:
-  # --- AUTH ---
   /auth/login:
     post:
       tags: ["Authentication"]
-      summary: "Login endpoint (Generates JWT Token)"
-      description: "Allows customers to log into their accounts"
+      summary: "Customer Login"
+      description: "Allows a customer to log in and receive a JWT token."
+      consumes:
+        - application/json
+      produces:
+        - application/json
       parameters:
         - in: body
           name: body
-          description: "Login credentials for the customer"
           required: true
+          description: "Login credentials for the customer"
           schema:
             $ref: "#/definitions/LoginCredentials"
+          examples:
+            application/json:
+              email: "user@example.com"
+              password: "password123"
       responses:
         '200':
           description: "Login successful"
           schema:
             $ref: "#/definitions/LoginResponse"
+          examples:
+            application/json:
+              status: "Login successful"
+              token: "jwt.token.here"
+              user:
+                id: 1
+                email: "user@example.com"
+                role: "customer"
         '400':
-          description: "Invalid credentials"
+          description: "Missing or invalid credentials"
           schema:
-            $ref: "#/definitions/ErrorResponse"
+            $ref: "#/definitions/LoginErrorResponse"
+          examples:
+            application/json:
+              error: "Invalid email or password"
         '500':
-          description: "Internal server error"
+          description: "Server error"
           schema:
             $ref: "#/definitions/ErrorResponse"
+          examples:
+            application/json:
+              error: "An unexpected error occurred"
 
   /auth/mechanic_login:
     post:
@@ -66,16 +85,31 @@ paths:
           description: "Login successful"
           schema:
             $ref: "#/definitions/LoginResponse"
+            examples:
+              application/json:
+                status: "Login successful"
+                token: "jwt.token.here"
+                user:
+                  id: 1
+                  email: "wepa@example.com"
+                  role: "mechanic"
         '400':
-          description: "Invalid credentials"
+          description: "Invalid credentials or missing fields"
           schema:
-            $ref: "#/definitions/ErrorResponse"
+            $ref: "#/definitions/LoginErrorResponse"
+            examples:
+              application/json:
+                error: "Invalid email or password"
         '500':
           description: "Internal server error"
           schema:
             $ref: "#/definitions/ErrorResponse"
+            examples:
+              application/json:
+                error: "An unexpected error occurred"
 
-  # --- CUSTOMERS MAIN ---
+# ------- CUSTOMER ENDPOINTS 
+
   /customers:
     post:
       tags: ["Customers"]
@@ -93,14 +127,27 @@ paths:
           description: "Customer created successfully"
           schema:
             $ref: "#/definitions/CustomerResponse"
+            examples:
+              application/json:
+                id: 1
+                name: "John Doe"
+                email: "john.doe@example.com"
+                phone: "+1234567890"
+                password: "password123"
         '400':
           description: "Invalid input or email already exists"
           schema:
-            $ref: "#/definitions/ErrorResponse"
+            $ref: "#/definitions/CustomerErrorResponse"
+            examples:
+              application/json:
+                error: "Invalid input or email already exists"
         '500':
           description: "Internal server error"
           schema:
             $ref: "#/definitions/ErrorResponse"
+            examples:
+              application/json:
+                error: "An unexpected error occurred"
 
     get:
       tags: ["Customers"]
@@ -124,25 +171,43 @@ paths:
           description: "List of customers"
           schema:
             $ref: "#/definitions/PaginatedCustomersResponse"
+            examples:
+              application/json:
+                page: 1
+                total_pages: 5
+                total_customers: 100
+                customers:
+                  - id: 1
+                    name: "John Doe"
+                    email: "john.doe@example.com"
+                    phone: "+1234567890"
         '400':
           description: "Invalid request"
           schema:
-            $ref: "#/definitions/ErrorResponse"
+            $ref: "#/definitions/PaginatedErrorResponse"
+            examples:
+              application/json:
+                error: "Invalid request parameters"
         '403':
-          description: "Forbidden"
+          description: "Unauthorized"
           schema:
-            $ref: "#/definitions/ErrorResponse"
+            $ref: "#/definitions/UnauthorizedErrorResponse"
+            examples:
+              application/json:
+                error: "Unauthorized access"
         '500':
           description: "Internal server error"
           schema:
             $ref: "#/definitions/ErrorResponse"
+            examples:
+              application/json:
+                error: "An unexpected error occurred"
 
-  # --- CUSTOMERS BY ID ---
   /customers/{customer_id}:
     get:
       tags: ["Customers"]
       summary: "Get a customer by ID"
-      description: "Mechanic or the customer themselves can get customer info."
+      description: "Retrieve a specific customer by their ID. Customer can only access their own data."
       security:
         - bearerAuth: []
       parameters:
@@ -150,25 +215,44 @@ paths:
           in: path
           required: true
           type: integer
-          description: "Customer ID"
+          description: "ID of the customer to retrieve"
       responses:
         '200':
           description: "Customer found"
           schema:
             $ref: "#/definitions/CustomerResponse"
+            examples:
+              application/json:
+                id: 1
+                name: "John Doe"
+                email: "john.doe@example.com"
+                phone: "+1234567890"
         '403':
-          description: "Forbidden"
+          description: "Unauthorized access"
           schema:
-            $ref: "#/definitions/ErrorResponse"
+            $ref: "#/definitions/UnauthorizedErrorResponse"
+            examples:
+              application/json:
+                error: "Unauthorized access"
         '404':
           description: "Customer not found"
           schema:
+            $ref: "#/definitions/CustomerNotFoundErrorResponse"
+            examples:
+              application/json:
+                error: "Customer not found"
+        '500':
+          description: "Internal server error"
+          schema:
             $ref: "#/definitions/ErrorResponse"
+            examples:
+              application/json:
+                error: "An unexpected error occurred"
 
     put:
       tags: ["Customers"]
       summary: "Update a customer"
-      description: "Customer can update their own data."
+      description: "Update customer details. Customer can only update their own data."
       security:
         - bearerAuth: []
       parameters:
@@ -176,7 +260,7 @@ paths:
           in: path
           required: true
           type: integer
-          description: "Customer ID"
+          description: "ID of the customer to update"
         - in: body
           name: body
           description: "Updated customer data"
@@ -185,26 +269,48 @@ paths:
             $ref: "#/definitions/Customer"
       responses:
         '200':
-          description: "Customer updated"
+          description: "Customer updated successfully"
           schema:
             $ref: "#/definitions/CustomerResponse"
+            examples:
+              application/json:
+                id: 1
+                name: "John Doe"
+                email: "john.doe@example.com"
+                phone: "+1234567890"
         '400':
-          description: "Invalid input"
+          description: "Invalid input or email already exists"
           schema:
-            $ref: "#/definitions/ErrorResponse"
+            $ref: "#/definitions/CustomerErrorResponse"
+            examples:
+              application/json:
+                error: "Invalid input or email already exists"
         '403':
-          description: "Unauthorized"
+          description: "Unauthorized access"
           schema:
-            $ref: "#/definitions/ErrorResponse"
+            $ref: "#/definitions/UnauthorizedErrorResponse"
+            examples:
+              application/json:
+                error: "Unauthorized access"
         '404':
           description: "Customer not found"
           schema:
+            $ref: "#/definitions/CustomerNotFoundErrorResponse"
+            examples:
+              application/json:
+                error: "Customer not found"
+        '500':
+          description: "Internal server error"
+          schema:
             $ref: "#/definitions/ErrorResponse"
+            examples:
+              application/json:
+                error: "An unexpected error occurred"
 
     patch:
       tags: ["Customers"]
       summary: "Partially update a customer"
-      description: "Customer can partially update their own data."
+      description: "Partially update customer details. Customer can only update their own data."
       security:
         - bearerAuth: []
       parameters:
@@ -212,113 +318,171 @@ paths:
           in: path
           required: true
           type: integer
-          description: "Customer ID"
+          description: "ID of the customer to update"
         - in: body
           name: body
-          description: "Partial customer data"
+          description: "Partial customer data to update"
           required: true
-          schema:
-            $ref: "#/definitions/CustomerPartialUpdate"
-      responses:
-        '200':
-          description: "Customer updated"
-          schema:
-            $ref: "#/definitions/CustomerResponse"
-        '400':
-          description: "Invalid input"
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-        '403':
-          description: "Unauthorized"
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-        '404':
-          description: "Customer not found"
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-
-    delete:
-      tags: ["Customers"]
-      summary: "Delete a customer"
-      description: "Customer can delete their own data."
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: customer_id
-          in: path
-          required: true
-          type: integer
-          description: "Customer ID"
-      responses:
-        '200':
-          description: "Customer deleted"
           schema:
             type: object
             properties:
-              message:
+              name:
                 type: string
-                example: "Customer: 101, successfully deleted!"
-        '403':
-          description: "Unauthorized"
+                example: "John Doe"
+              email:
+                type: string
+                format: email
+                example: "john.doe@example.com"
+              phone:
+                type: string
+                example: "+1234567890"
+              password:
+                type: string
+                example: "newpassword123"
+      responses:
+        '200':
+          description: "Customer partially updated successfully"
           schema:
-            $ref: "#/definitions/ErrorResponse"
+            $ref: "#/definitions/CustomerResponse"
+            examples:
+              application/json:
+                id: 1
+                name: "John Doe"
+                email: "john.doe@example.com"
+                phone: "+1234567890"
+        '400':
+          description: "Invalid input or email already exists"
+          schema:
+            $ref: "#/definitions/CustomerErrorResponse"
+            examples:
+              application/json:
+                error: "Invalid input or email already exists"
+        '403':
+          description: "Unauthorized access"
+          schema:
+            $ref: "#/definitions/UnauthorizedErrorResponse"
+            examples:
+              application/json:
+                error: "Unauthorized access"
         '404':
           description: "Customer not found"
           schema:
+            $ref: "#/definitions/CustomerNotFoundErrorResponse"
+            examples:
+              application/json:
+                error: "Customer not found"
+        '500':
+          description: "Internal server error"
+          schema:
             $ref: "#/definitions/ErrorResponse"
+            examples:
+              application/json:
+                error: "An unexpected error occurred"
+    delete:
+      tags: ["Customers"]
+      summary: "Delete a customer"
+      description: "Delete a customer account. Customer can only delete their own account."
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: customer_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the customer to delete"
+      responses:
+        '204':
+          description: "Customer deleted successfully"
+        '403':
+          description: "Unauthorized access"
+          schema:
+            $ref: "#/definitions/UnauthorizedErrorResponse"
+            examples:
+              application/json:
+                error: "Unauthorized access"
+        '404':
+          description: "Customer not found"
+          schema:
+            $ref: "#/definitions/CustomerNotFoundErrorResponse"
+            examples:
+              application/json:
+                error: "Customer not found"
+        '500':
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+            examples:
+              application/json:
+                error: "An unexpected error occurred"
 
   /customers/search:
     get:
       tags: ["Customers"]
-      summary: "Search customers"
-      description: "Search for customers by name or email."
+      summary: "Search for customers"
+      description: "Search for customers by name or email. Mechanic only."
       security:
         - bearerAuth: []
       parameters:
-        - name: name
+        - name: query
           in: query
-          description: "Customer name (optional)"
-          required: false
+          required: true
           type: string
-        - name: email
+          description: "Search query (name or email)"
+        - name: page
           in: query
-          description: "Customer email (optional)"
-          required: false
-          type: string
+          type: integer
+          description: "Page number (default 1)"
+        - name: limit
+          in: query
+          type: integer
+          description: "Number of results per page (default 20)"
       responses:
         '200':
-          description: "Customers found"
+          description: "Search results"
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/CustomerResponse"
+            $ref: "#/definitions/PaginatedCustomersResponse"
+            examples:
+              application/json:
+                page: 1
+                total_pages: 5
+                total_customers: 100
+                customers:
+                  - id: 1
+                    name: "John Doe"
+                    email: "john.doe@example.com"
+                    phone: "+1234567890"
         '400':
-          description: "Invalid search criteria"
+          description: "Invalid request parameters"
           schema:
-            $ref: "#/definitions/ErrorResponse"
+            $ref: "#/definitions/PaginatedErrorResponse"
+            examples:
+              application/json:
+                error: "Invalid request parameters"
         '403':
-          description: "Forbidden"
+          description: "Unauthorized access"
+          schema:
+            $ref: "#/definitions/UnauthorizedErrorResponse"
+            examples:
+              application/json:
+                error: "Unauthorized access"
+        '500':
+          description: "Internal server error"
           schema:
             $ref: "#/definitions/ErrorResponse"
-        '404':
-          description: "No customers found"
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-
-  # --- MECHANICS MAIN ---
+            examples:
+              application/json:
+                error: "An unexpected error occurred"
+    
   /mechanics:
     post:
-      tags:
-        - "Mechanics"
-      summary: "Create a new mechanic"
-      description: "Register a new mechanic (RBAC: mechanic only)"
-      security:
-        - bearerAuth: []
+      tags: ["Mechanics"]
+      summary: "Register a new mechanic"
+      description: "Register a new mechanic. Requires name, email, phone, and password."
       parameters:
-        - in: "body"
-          name: "body"
-          required: true
+        - in: body
+          name: body
           description: "Mechanic registration data"
+          required: true
           schema:
             $ref: "#/definitions/Mechanic"
       responses:
@@ -326,20 +490,291 @@ paths:
           description: "Mechanic created successfully"
           schema:
             $ref: "#/definitions/MechanicResponse"
+            examples:
+              application/json:
+                id: 1
+                name: "Jane Doe"
+                email: "jane.doe@example.com"
+                phone: "+1234567890"
+                password: "password123"
+                salary: 50000
         '400':
-          description: "Mechanic already exists or invalid input"
+          description: "Invalid input or email already exists"
           schema:
-            $ref: "#/definitions/ErrorResponse"
+            $ref: "#/definitions/MechanicErrorResponse"
+            examples:
+              application/json:
+                error: "Invalid input or email already exists"
         '500':
           description: "Internal server error"
           schema:
             $ref: "#/definitions/ErrorResponse"
+            examples:
+              application/json:
+                error: "An unexpected error occurred"
 
     get:
-      tags:
-        - "Mechanics"
+      tags: ["Mechanics"]
       summary: "Get all mechanics"
-      description: "Retrieve paginated mechanics (RBAC: mechanic only)"
+      description: "Retrieve a paginated list of all mechanics (mechanics only)."
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          required: false
+          type: integer
+          description: "Page number (default 1)"
+        - name: limit
+          in: query
+          required: false
+          type: integer
+          description: "Number of results per page (default 20)"
+      responses:  
+        '200':
+          description: "List of mechanics"
+          schema:
+            $ref: "#/definitions/PaginatedMechanicsResponse"
+            examples:
+              application/json:
+                page: 1
+                total_pages: 5
+                total_mechanics: 50
+                mechanics:
+                  - id: 1
+                    name: "Jane Doe"
+                    email: "jane.doe@example.com"
+                    phone: "+1234567890"
+                    salary: 50000
+        '400':
+          description: "Invalid request"
+          schema:
+            $ref: "#/definitions/PaginatedErrorResponse"
+            examples:
+              application/json:
+                error: "Invalid request parameters"
+        '403':
+          description: "Unauthorized"
+          schema:
+            $ref: "#/definitions/UnauthorizedErrorResponse"
+            examples:
+              application/json:
+                error: "Unauthorized access"
+        '500':
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+            examples:
+              application/json:
+                error: "An unexpected error occurred"
+
+
+  /mechanics/{mechanic_id}:
+    get:
+      tags: ["Mechanics"]
+      summary: "Get a mechanic by ID"
+      description: "Retrieve a specific mechanic by their ID. Mechanic can only access their own data."
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: mechanic_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the mechanic to retrieve"
+      responses:
+        '200':
+          description: "Mechanic found"
+          schema:
+            $ref: "#/definitions/MechanicResponse"
+            examples:
+              application/json:
+                id: 1
+                name: "Jane Doe"
+                email: "jane.doe@example.com"
+                phone: "+1234567890"
+                salary: 50000
+        '403':
+          description: "Unauthorized access"
+          schema:
+            $ref: "#/definitions/UnauthorizedErrorResponse"
+            examples:
+              application/json:
+                error: "Unauthorized access"
+        '404':
+          description: "Mechanic not found"
+          schema:
+            $ref: "#/definitions/MechanicNotFoundErrorResponse"
+            examples:
+              application/json:
+                error: "Mechanic not found"
+        '500':
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+            examples:
+              application/json:
+                error: "An unexpected error occurred"
+    put:
+      tags: ["Mechanics"]
+      summary: "Update a mechanic"
+      description: "Update mechanic details. Mechanic can only update their own data."
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: mechanic_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the mechanic to update"
+        - in: body
+          name: body
+          description: "Updated mechanic data"
+          required: true
+          schema:
+            $ref: "#/definitions/Mechanic"
+      responses:
+        '200':
+          description: "Mechanic updated successfully"
+          schema:
+            $ref: "#/definitions/MechanicResponse"
+            examples:
+              application/json:
+                id: 1
+                name: "Jane Doe"
+                email: "jane.doe@example.com"
+                phone: "+1234567890"
+                salary: 50000
+        '400':
+          description: "Invalid input or email already exists"
+          schema:
+            $ref: "#/definitions/MechanicErrorResponse"
+            examples:
+              application/json:
+                error: "Invalid input or email already exists"
+        '403':
+          description: "Unauthorized access"
+          schema:
+            $ref: "#/definitions/UnauthorizedErrorResponse"
+            examples:
+              application/json:
+                error: "Unauthorized access"
+        '404':
+          description: "Mechanic not found"
+          schema:
+            $ref: "#/definitions/MechanicNotFoundErrorResponse"
+            examples:
+              application/json:
+                error: "Mechanic not found"
+        '500':
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+            examples:
+              application/json:
+                error: "An unexpected error occurred"
+
+    patch:
+      tags: ["Mechanics"]
+      summary: "Partially update a mechanic"
+      description: "Partially update mechanic details. Mechanic can only update their own data."
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: mechanic_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the mechanic to update"
+        - in: body
+          name: body
+          description: "Updated mechanic data"
+          required: true
+          schema:
+            $ref: "#/definitions/Mechanic"
+      responses:
+        '200':
+          description: "Mechanic partially updated successfully"
+          schema:
+            $ref: "#/definitions/MechanicResponse"
+            examples:
+              application/json:
+                id: 1
+                name: "Jane Doe"
+                email: "jane.doe@example.com"
+                phone: "+1234567890"
+                salary: 50000
+        '400':
+          description: "Invalid input or email already exists"
+          schema:
+            $ref: "#/definitions/MechanicErrorResponse"
+            examples:
+              application/json:
+                error: "Invalid input or email already exists"
+        '403':
+          description: "Unauthorized access"
+          schema:
+            $ref: "#/definitions/UnauthorizedErrorResponse"
+            examples:
+              application/json:
+                error: "Unauthorized access"
+        '404':
+          description: "Mechanic not found"
+          schema:
+            $ref: "#/definitions/MechanicNotFoundErrorResponse"
+            examples:
+              application/json:
+                error: "Mechanic not found"
+        '500':
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+            examples:
+              application/json:
+                error: "An unexpected error occurred"
+
+    delete:
+      tags: ["Mechanics"]
+      summary: "Delete a mechanic"
+      description: "Delete a mechanic account. Mechanic can only delete their own account."
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: mechanic_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the mechanic to delete"
+      responses:
+        '204':
+          description: "Mechanic deleted successfully"
+        '403':
+          description: "Unauthorized access"
+          schema:
+            $ref: "#/definitions/UnauthorizedErrorResponse"
+            examples:
+              application/json:
+                error: "Unauthorized access"
+        '404':
+          description: "Mechanic not found"
+          schema:
+            $ref: "#/definitions/MechanicNotFoundErrorResponse"
+            examples:
+              application/json:
+                error: "Mechanic not found"
+        '500':
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+            examples:
+              application/json:
+                error: "An unexpected error occurred"
+  
+  /mechanics/popular:
+    get:
+      tags: ["Mechanics"]
+      summary: "Get all mechanics"
+      description: "Retrieve a paginated list of mechanics. Mechanic-only access."
       security:
         - bearerAuth: []
       parameters:
@@ -347,229 +782,735 @@ paths:
           in: query
           type: integer
           required: false
-          description: "Page number (default 1)"
+          description: "Page number (default is 1)"
         - name: per_page
           in: query
           type: integer
           required: false
-          description: "Mechanics per page (default 20)"
+          description: "Mechanics per page (default is 20)"
       responses:
         '200':
           description: "List of mechanics"
           schema:
             $ref: "#/definitions/PaginatedMechanicsResponse"
+          examples:
+            application/json:
+              mechanics:
+                - id: 1
+                  name: "Maria Torque"
+                  email: "maria@fixit.com"
+                  phone: "555-1212"
+              page: 1
+              per_page: 20
+              total: 2
+              pages: 1
         '400':
-          description: "Invalid query params"
+          description: "Invalid request parameters"
           schema:
-            $ref: "#/definitions/ErrorResponse"
+            $ref: "#/definitions/PaginatedErrorResponse"
+            examples:
+              application/json:
+                error: "Invalid request parameters"
         '403':
-          description: "Access denied"
+          description: "Unauthorized access"
           schema:
-            $ref: "#/definitions/ErrorResponse"
+            $ref: "#/definitions/UnauthorizedErrorResponse"
+            examples:
+              application/json:
+                error: "Unauthorized access"
         '404':
           description: "No mechanics found"
           schema:
+            $ref: "#/definitions/MechanicNotFoundErrorResponse"
+            examples:
+              application/json:
+                error: "No mechanics found"
+        '500':
+          description: "Internal server error"
+          schema:
             $ref: "#/definitions/ErrorResponse"
+            examples:
+              application/json:
+                error: "An unexpected error occurred"
 
-  /mechanics/{mechanic_id}:
+  /mechanics/search:
     get:
-      tags:
-        - "Mechanics"
-      summary: "Get a mechanic by ID"
-      description: "Mechanic or customer can get mechanic info"
+      tags: ["Mechanics"]
+      summary: "Search for mechanics"
+      description: "Search for mechanics by name or email. Mechanic-only access."
       security:
         - bearerAuth: []
       parameters:
-        - name: mechanic_id
+        - name: query
+          in: query
+          required: true
+          type: string
+          description: "Search query (name or email)"
+        - name: page
+          in: query
+          type: integer
+          required: false
+          description: "Page number (default is 1)"
+        - name: per_page
+          in: query
+          type: integer
+          required: false
+          description: "Mechanics per page (default is 20)"
+      responses:
+        '200':
+          description: "Search results"
+          schema:
+            $ref: "#/definitions/PaginatedMechanicsResponse"
+          examples:
+            application/json:
+              mechanics:
+                - id: 1
+                  name: "Maria Torque"
+                  email: "maria@fixit.com"
+                  phone: "555-1212"
+              page: 1
+              per_page: 20
+              total: 1
+              pages: 1
+        '400':
+          description: "Invalid request parameters"
+          schema:
+            $ref: "#/definitions/PaginatedErrorResponse"
+            examples:
+              application/json:
+                error: "Invalid request parameters"
+        '403':
+          description: "Unauthorized access"
+          schema:
+            $ref: "#/definitions/UnauthorizedErrorResponse"
+            examples:
+              application/json:
+                error: "Unauthorized access"
+        '404':
+          description: "No mechanics found"
+          schema:
+            $ref: "#/definitions/MechanicNotFoundErrorResponse"
+            examples:
+              application/json:
+                error: "No mechanics found"
+        '500':
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+            examples:
+              application/json:
+                error: "An unexpected error occurred"
+                
+
+# --- Inventory Endpoints ---
+  /inventory:
+    post:
+      tags: ["Inventory"]
+      summary: "Create a new inventory item"
+      description: "Mechanic only. Add a new part to inventory."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: body
+          name: body
+          required: true
+          description: "Inventory item data"
+          schema:
+            $ref: "#/definitions/InventoryCreate"
+      responses:
+        '201':
+          description: "Inventory item created"
+          schema:
+            $ref: "#/definitions/InventoryResponse"
+          examples:
+            application/json:
+              id: 1001
+              part_name: "Brake Pad"
+              part_number: "BR-321"
+              quantity: 50
+              price: 79.99
+        '400':
+          description: "Validation or duplicate error"
+          schema:
+            $ref: "#/definitions/InventoryErrorResponse"
+          examples:
+            application/json:
+              error: "Part number already exists"
+        '500':
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  
+    get:
+      tags: ["Inventory"]
+      summary: "Get all inventory items"
+      description: "Retrieve a paginated list of inventory items. Open to all users."
+      parameters:
+        - name: page
+          in: query
+          type: integer
+          required: false
+          description: "Page number (default is 1)"
+        - name: limit
+          in: query
+          type: integer
+          required: false
+          description: "Number of items per page (default is 20)"
+      responses:
+        '200':
+          description: "List of inventory items"
+          schema:
+            $ref: "#/definitions/InventoryPaginated"
+          examples:
+            application/json:
+              inventory_items:
+                - id: 1
+                  part_name: "Brake Pad"
+                  part_number: "BR-001"
+                  quantity: 20
+                  price: 79.99
+              page: 1
+              per_page: 20
+              total: 1
+              pages: 1
+        '400':
+          description: "Invalid request parameters"
+          schema:
+            $ref: "#/definitions/PaginatedErrorResponse"
+          examples:
+            application/json:
+              error: "Invalid request parameters"
+        '500':
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            application/json:
+              error: "An unexpected error occurred"
+
+  /inventory/{item_id}:
+    get:
+      tags: ["Inventory"]
+      summary: "Get an inventory item by ID"
+      description: "Retrieve a specific inventory item by its ID. Open to all users."
+      parameters:
+        - name: item_id
           in: path
           required: true
           type: integer
-          description: "Mechanic ID"
+          description: "ID of the inventory item"
       responses:
         '200':
-          description: "Mechanic found"
+          description: "Inventory item found"
           schema:
-            $ref: "#/definitions/MechanicResponse"
-        '403':
-          description: "Access denied"
-          schema:
-            $ref: "#/definitions/ErrorResponse"
+            $ref: "#/definitions/InventoryResponse"
+          examples:
+            application/json:
+              id: 1
+              part_name: "Brake Pad"
+              part_number: "BR-001"
+              quantity: 20
+              price: 79.99
         '404':
-          description: "Mechanic not found"
+          description: "Inventory item not found"
+          schema:
+            $ref: "#/definitions/InventoryNotFoundErrorResponse"
+          examples:
+            application/json:
+              error: "Inventory item not found"
+        '500':
+          description: "Internal server error"
           schema:
             $ref: "#/definitions/ErrorResponse"
+          examples:
+            application/json:
+              error: "An unexpected error occurred"
 
     put:
-      tags:
-        - "Mechanics"
-      summary: "Update a mechanic"
-      description: "Update a mechanic's information"
+      tags: ["Inventory"]
+      summary: "Update an inventory item"
+      description: "Update an existing inventory item. Mechanic only."
       security:
         - bearerAuth: []
       parameters:
-        - name: mechanic_id
+        - name: item_id
           in: path
           required: true
           type: integer
+          description: "ID of the inventory item to update"
         - in: body
           name: body
           required: true
-          description: "Mechanic data to update"
+          description: "Updated inventory item data"
           schema:
-            $ref: "#/definitions/Mechanic"
+            $ref: "#/definitions/InventoryCreate"
       responses:
         '200':
-          description: "Mechanic updated"
+          description: "Inventory item updated successfully"
           schema:
-            $ref: "#/definitions/MechanicResponse"
+            $ref: "#/definitions/InventoryResponse"
         '400':
-          description: "Invalid input"
+          description: "Validation or duplicate error"
           schema:
-            $ref: "#/definitions/ErrorResponse"
+            $ref: "#/definitions/InventoryErrorResponse"
         '404':
-          description: "Mechanic not found"
+          description: "Inventory item not found"
           schema:
-            $ref: "#/definitions/ErrorResponse"
-        '403':
-          description: "Unauthorized"
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-
-    patch:
-      tags:
-        - "Mechanics"
-      summary: "Partially update a mechanic"
-      description: "Update select fields for mechanic"
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: mechanic_id
-          in: path
-          required: true
-          type: integer
-        - in: body
-          name: body
-          required: true
-          description: "Partial mechanic data"
-          schema:
-            $ref: "#/definitions/MechanicPartialUpdate"
-      responses:
-        '200':
-          description: "Mechanic updated"
-          schema:
-            $ref: "#/definitions/MechanicResponse"
-        '400':
-          description: "Invalid input"
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-        '404':
-          description: "Mechanic not found"
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-        '403':
-          description: "Unauthorized"
+            $ref: "#/definitions/InventoryNotFoundErrorResponse"
+        '500':
+          description: "Internal server error"
           schema:
             $ref: "#/definitions/ErrorResponse"
 
     delete:
-      tags:
-        - "Mechanics"
-      summary: "Delete a mechanic"
-      description: "Deletes a mechanic by ID"
+      tags: ["Inventory"]
+      summary: "Delete an inventory item"
+      description: "Delete an inventory item by ID. Mechanic only."
       security:
         - bearerAuth: []
       parameters:
-        - name: mechanic_id
+        - name: item_id
           in: path
           required: true
           type: integer
+          description: "ID of the inventory item to delete"
       responses:
-        '200':
-          description: "Mechanic deleted"
+        '204':
+          description: "Inventory item deleted successfully"
           schema:
-            $ref: "#/definitions/MechanicDeleteResponse"
+            $ref: "#/definitions/InventoryDeletionResponse"
         '404':
-          description: "Mechanic not found"
+          description: "Inventory item not found"
+          schema:
+            $ref: "#/definitions/InventoryNotFoundErrorResponse"
+          examples:
+            application/json:
+              error: "Inventory item not found"
+        '500':
+          description: "Internal server error"
           schema:
             $ref: "#/definitions/ErrorResponse"
-        '403':
-          description: "Unauthorized"
-          schema:
-            $ref: "#/definitions/ErrorResponse"
+          examples:
+            application/json:
+              error: "An unexpected error occurred"
 
-  /mechanics/popular:
-    get:
-      tags:
-        - "Mechanics"
-      summary: "Get popular mechanics"
-      description: "Get mechanics sorted by the number of service tickets"
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: "Popular mechanics list"
-          schema:
-            type: array
-            items:
-              $ref: "#/definitions/MechanicResponse"
-        '403':
-          description: "Access denied"
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-        '404':
-          description: "No mechanics found"
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-
-  /mechanics/search:
-    get:
-      tags:
-        - "Mechanics"
-      summary: "Search mechanics"
-      description: "Search mechanics by name or email"
+ # --- Service Tickets ---
+  /service_tickets:
+    post:
+      tags: ["Service Tickets"]
+      summary: "Create a new service ticket"
+      description: "Mechanic only. Create a new service ticket for a customer."
       security:
         - bearerAuth: []
       parameters:
-        - name: name
+        - in: body
+          name: body
+          required: true
+          description: "Service ticket data"
+          schema:
+            $ref: "#/definitions/ServiceTicketCreate"
+      responses:
+        '201':
+          description: "Service ticket created successfully"
+          schema:
+            $ref: "#/definitions/ServiceTicketResponse"
+          examples:
+            application/json:
+              id: 1
+              customer_id: 101
+              mechanic_id: 1
+              status: "open"
+              description: "Brake pad replacement needed"
+        '400':
+          description: "Invalid input or customer/mechanic not found"
+          schema:
+            $ref: "#/definitions/ServiceTicketErrorResponse"
+          examples:
+            application/json:
+              error: "Invalid input or customer/mechanic not found"
+        '403':
+          description: "Unauthorized access"
+          schema:
+            $ref: "#/definitions/UnauthorizedErrorResponse"
+          examples:
+            application/json:
+              error: "Unauthorized access"
+        '500':
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+    get:
+      tags: ["Service Tickets"]
+      summary: "Get all service tickets"
+      description: "Retrieve a paginated list of all service tickets. Mechanic only."
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
           in: query
-          type: string
+          type: integer
           required: false
-          description: "Mechanic name (optional)"
-        - name: email
+          description: "Page number (default is 1)"
+        - name: limit
           in: query
-          type: string
+          type: integer
           required: false
-          description: "Mechanic email (optional)"
+          description: "Number of results per page (default is 20)"
       responses:
         '200':
-          description: "Mechanics found"
+          description: "List of service tickets"
+          schema:
+            $ref: "#/definitions/PaginatedServiceTicketsResponse"
+          examples:
+            application/json:
+              service_tickets:
+                - id: 1
+                  customer_id: 101
+                  mechanic_id: 1
+                  status: "open"
+                  description: "Brake pad replacement needed"
+              page: 1
+              per_page: 20
+              total: 100
+              pages: 5
+        '400':
+          description: "Invalid request parameters"
+          schema:
+            $ref: "#/definitions/PaginatedErrorResponse"
+          examples:
+            application/json:
+              error: "Invalid request parameters"
+        '403':
+          description: "Unauthorized access"
+          schema:
+            $ref: "#/definitions/UnauthorizedErrorResponse"
+          examples:
+            application/json:
+              error: "Unauthorized access"
+        '500':
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            application/json:
+              error: "An unexpected error occurred"
+            
+  /service_tickets/{ticket_id}:
+    get:
+      tags: ["Service Tickets"]
+      summary: "Get a service ticket by ID"
+      description: "Retrieve a specific service ticket by its ID. Mechanic only."
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: ticket_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the service ticket to retrieve"
+      responses:
+        '200':
+          description: "Service ticket found"
+          schema:
+            $ref: "#/definitions/ServiceTicketResponse"
+          examples:
+            application/json:
+              id: 1
+              customer_id: 101
+              mechanic_id: 1
+              status: "open"
+              description: "Brake pad replacement needed"
+        '403':
+          description: "Unauthorized access"
+          schema:
+            $ref: "#/definitions/UnauthorizedErrorResponse"
+          examples:
+            application/json:
+              error: "Unauthorized access"
+        '404':
+          description: "Service ticket not found"
+          schema:
+            $ref: "#/definitions/ServiceTicketNotFoundErrorResponse"
+          examples:
+            application/json:
+              error: "Service ticket not found"
+        '500':
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            application/json:
+              error: "An unexpected error occurred"
+
+  /service_tickets/edit/{ticket_id}:
+    put:
+      tags: ["Service Tickets"]
+      summary: "Edit service ticket mechanics"
+      description: "Add or remove mechanics from a service ticket. Mechanic only."
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: ticket_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the service ticket to update"
+        - in: body
+          name: body
+          required: true
+          description: "Mechanic assignment changes"
+          schema:
+            $ref: "#/definitions/ServiceTicketMechanicEdit"
+      responses:
+        '200':
+          description: "Service ticket updated successfully"
+          schema:
+            $ref: "#/definitions/ServiceTicketResponse"
+          examples:
+            application/json:
+              id: 1
+              status: "in_progress"
+              description: "Brake pad replacement in progress"
+              mechanics:
+                - id: 2
+                  name: "Jane Doe"               
+        '400':
+          description: "Mechanic not found or already assigned/removed"
+          schema:
+            $ref: "#/definitions/ServiceTicketErrorResponse"
+          examples:
+            application/json:
+              error: "Mechanic with id 3 already assigned"
+        '403':
+          description: "Unauthorized access"
+          schema:
+            $ref: "#/definitions/UnauthorizedErrorResponse"
+          examples:
+            application/json:
+              error: "Unauthorized access"
+        '404':
+          description: "Service ticket not found"
+          schema:
+            $ref: "#/definitions/ServiceTicketNotFoundErrorResponse"
+          examples:
+            application/json:
+              error: "Service ticket not found"
+        '500':
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            application/json:
+              error: "An unexpected error occurred"
+  
+  /service_tickets/{ticket_id}/parts:
+    get:
+      tags: ["Service Tickets"]
+      summary: "List all inventory parts in a service ticket"
+      description: "Returns a list of inventory parts (with quantity) for a given service ticket. Accessible by the customer who owns the ticket or a mechanic."
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: ticket_id
+          in: path
+          required: true
+          type: integer
+          description: "ID of the service ticket"
+      responses:
+        '200':
+          description: "Parts list retrieved successfully"
+          schema:
+            $ref: "#/definitions/ServiceTicketPartsResponse"
+          examples:
+            application/json:
+              Service ticket ID: 12
+              Parts:
+                - id: 4
+                  part_name: "Brake Pad"
+                  quantity: 2
+                - id: 6
+                  part_name: "Air Filter"
+                  quantity: 1
+        '403':
+          description: "Unauthorized access"
+          schema:
+            $ref: "#/definitions/UnauthorizedErrorResponse"
+          examples:
+            application/json:
+              error: "Unauthorized access to service ticket parts."
+        '404':
+          description: "Service ticket not found"
+          schema:
+            $ref: "#/definitions/ServiceTicketNotFoundErrorResponse"
+          examples:
+            application/json:
+              error: "Service ticket ID 12 not found."
+        '500':
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            application/json:
+              error: "An unexpected error occurred"
+
+  /service_tickets/{ticket_id}/add_part/{inventory_id}:
+    put:
+      tags: ["Service Tickets"]
+      summary: "Add or update inventory part in a service ticket"
+      description: "Mechanic only. Adds a part to a service ticket or updates its quantity."
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: ticket_id
+          in: path
+          type: integer
+          required: true
+          description: "ID of the service ticket"
+        - name: inventory_id
+          in: path
+          type: integer
+          required: true
+          description: "ID of the inventory part to add/update"
+        - in: body
+          name: body
+          required: true
+          description: "Quantity of the part to be added or updated"
+          schema:
+            type: object
+            required: [quantity]
+            properties:
+              quantity:
+                type: integer
+                example: 2
+      responses:
+        '200':
+          description: "Part added or quantity updated successfully"
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Updated quantity of part Brake Pads in service ticket 3 to 2."
+        '400':
+          description: "Invalid quantity input"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            application/json:
+              error: "Quantity must be a positive integer."
+        '404':
+          description: "Service ticket or part not found"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            application/json:
+              error: "Service ticket or inventory part not found."
+        '403':
+          description: "Unauthorized access"
+          schema:
+            $ref: "#/definitions/UnauthorizedErrorResponse"
+          examples:
+            application/json:
+              error: "Unauthorized access"
+        '500':
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            application/json:
+              error: "An unexpected error occurred"
+
+
+  /service_tickets/search:
+    get:
+      tags: ["Service Tickets"]
+      summary: "Search service tickets"
+      description: "Mechanics can search for service tickets using VIN, service date, or a date range."
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: vin
+          in: query
+          type: string
+          required: false
+          description: "Partial or full VIN to match"
+        - name: service_date
+          in: query
+          type: string
+          format: date
+          required: false
+          description: "Exact service date to filter by (format: YYYY-MM-DD)"
+        - name: start_date
+          in: query
+          type: string
+          format: date
+          required: false
+          description: "Start of date range (format: YYYY-MM-DD)"
+        - name: end_date
+          in: query
+          type: string
+          format: date
+          required: false
+          description: "End of date range (format: YYYY-MM-DD)"
+      responses:
+        '200':
+          description: "Search results"
           schema:
             type: array
             items:
-              $ref: "#/definitions/MechanicResponse"
+              $ref: "#/definitions/ServiceTicketResponse"
+          examples:
+            application/json:
+              - id: 7
+                customer_id: 101
+                mechanic_id: 2
+                status: "open"
+                description: "Leaking brake fluid"
+              - id: 9
+                customer_id: 102
+                mechanic_id: 3
+                status: "in_progress"
+                description: "Oil change and air filter"
         '400':
-          description: "Invalid search criteria"
+          description: "Invalid date format"
           schema:
             $ref: "#/definitions/ErrorResponse"
-        '403':
-          description: "Unauthorized"
-          schema:
-            $ref: "#/definitions/ErrorResponse"
+          examples:
+            application/json:
+              error: "Invalid date format. Use YYYY-MM-DD."
         '404':
-          description: "No mechanics found"
+          description: "No service tickets found"
+          schema:
+            $ref: "#/definitions/ServiceTicketNotFoundErrorResponse"
+          examples:
+            application/json:
+              message: "No service tickets found."
+        '403':
+          description: "Unauthorized access"
+          schema:
+            $ref: "#/definitions/UnauthorizedErrorResponse"
+          examples:
+            application/json:
+              error: "Unauthorized access"
+        '500':
+          description: "Internal server error"
           schema:
             $ref: "#/definitions/ErrorResponse"
+          examples:
+            application/json:
+              error: "An unexpected error occurred"
 
 
-# ==========================
-#      DEFINITIONS
-# ==========================
-
+#=========DEFINITIONS==========
 definitions:
-  # --- AUTH Customer ---
+
+  # ------ Authentication --------
   LoginCredentials:
     type: object
-    required: [email, password]
+    required:
+      - email
+      - password
     properties:
       email:
         type: string
@@ -587,20 +1528,28 @@ definitions:
         example: "Login successful"
       token:
         type: string
+        example: "jwt.token.here"
       user:
         type: object
         properties:
           id:
             type: integer
-            example: 123
+            example: 1
           email:
             type: string
-            example: "email@example.com"
+            example: "user@example.com"
           role:
             type: string
             example: "customer"
 
-  # --- CUSTOMERS ---
+  LoginErrorResponse:
+    type: object
+    properties:
+      error:
+        type: string
+        example: "Invalid email or password"
+
+  # ------ Customer --------
   Customer:
     type: object
     required: [name, email, phone, password]
@@ -635,191 +1584,398 @@ definitions:
         type: string
         example: "555-1234"
 
-  PaginatedCustomersResponse:
-    type: object
-    properties:
-      customers:
-        type: array
-        items:
-          $ref: "#/definitions/CustomerResponse"
-      page:
-        type: integer
-        example: 1
-      per_page:
-        type: integer
-        example: 20
-      total:
-        type: integer
-        example: 123
-      pages:
-        type: integer
-        example: 7
-
-  ErrorResponse:
+  CustomerErrorResponse:
     type: object
     properties:
       error:
         type: string
-        example: "Invalid email or password"
+        example: "Email already exists"
 
-  CustomerPartialUpdate:
+  PaginatedCustomersResponse:
     type: object
-    properties:
-      name:
-        type: string
-        example: "John Doe"
-      email:
-        type: string
-        format: email
-        example: "john@example.com"
-      phone:
-        type: string
-        example: "555-1234"
-
-  CustomerDeleteResponse:
-    type: object
-    properties:
-      message:
-        type: string
-        example: "Customer: 101, successfully deleted!"
-
-  CustomerSearchResponse:
-    type: object
+    required:
+      - customers
+      - page
+      - per_page
+      - total
+      - pages
     properties:
       customers:
         type: array
         items:
           $ref: "#/definitions/CustomerResponse"
-      total:
-        type: integer
-        example: 2
       page:
         type: integer
         example: 1
       per_page:
         type: integer
         example: 20
+      total:
+        type: integer
+        example: 100
       pages:
         type: integer
-        example: 1
+        example: 5
 
-  # --- Mechanics AUTH ---
-  MechanicLoginCredentials:
-    type: object
-    required:
-      - email
-      - password
-    properties:
-      email:
-        type: string
-        format: email
-        example: "mechanic@example.com"
-      password:
-        type: string
-        example: "password123"
-
-  MechanicLoginResponse:
+  CustomerNotFoundErrorResponse:
     type: object
     properties:
-      token:
+      error:
         type: string
-        example: "jwt.token.here"
-      user:
-        type: object
-        properties:
-          id:
-            type: integer
-            example: 42
-          email:
-            type: string
-            example: "mechanic@example.com"
-          role:
-            type: string
-            example: "mechanic"
+        example: "Customer not found"
 
-  # --- Mechanics ---
+  CustomerDeletionResponse:
+    type: object
+    properties:
+      message:
+        type: string
+        example: "Customer deleted successfully"
+
+  # ------ Mechanic --------
   Mechanic:
     type: object
-    required:
-      - name
-      - email
-      - phone
-      - salary
-      - password
+    required: [name, email, phone, password]
     properties:
       name:
         type: string
-        example: "Jane Smith"
+        example: "Jane Doe"
       email:
         type: string
-        example: "jane.smith@example.com"
+        format: email
+        example: "jane.doe@example.com"
       phone:
         type: string
-        example: "555-5678"
-      salary:
-        type: number
-        format: float
-        example: 60000
+        example: "+1234567890"
       password:
         type: string
-        example: "supersecret"
+        example: "password123"
 
   MechanicResponse:
     type: object
     properties:
       id:
         type: integer
-        example: 1001
-      name:
-        type: string
-        example: "Jane Smith"
-      email:
-        type: string
-        example: "jane.smith@example.com"
-
-  PaginatedMechanicsResponse:
-    type: object
-    properties:
-      mechanics:
-        type: array
-        items:
-          $ref: "#/definitions/MechanicResponse"
-      total:
-        type: integer
-        example: 12
-      pages:
-        type: integer
-        example: 2
-      current_page:
-        type: integer
         example: 1
-      has_next:
-        type: boolean
-        example: true
-      has_prev:
-        type: boolean
-        example: false
-
-  MechanicPartialUpdate:
-    type: object
-    properties:
       name:
         type: string
+        example: "Jane Doe"
       email:
         type: string
-      password:
+        example: "jane.doe@example.com"
+      phone:
         type: string
-
-  MechanicDeleteResponse:
-    type: object
-    properties:
-      message:
-        type: string
-        example: "Mechanic: ID: 1001 Name: Jane Smith deleted successfully"
+        example: "+1234567890"
 
   MechanicErrorResponse:
     type: object
     properties:
       error:
         type: string
+        example: "Invalid input or email already exists"
+  
+  MechanicNotFoundErrorResponse:
+    type: object
+    properties:
+      error:
+        type: string
         example: "Mechanic not found"
+  
+  PaginatedMechanicResponse:
+  type: object
+  required: [mechanics, page, per_page, total, pages]
+  properties:
+    mechanics:
+      type: array
+      items:
+        $ref: "#/definitions/MechanicResponse"
+    page:
+      type: integer
+      example: 1
+    per_page:
+      type: integer
+      example: 20
+    total:
+      type: integer
+      example: 100
+    pages:
+      type: integer
+      example: 5
+
+  PaginatedMechanicsResponse:
+    type: object
+    required: [mechanics, page, per_page, total, pages]
+    properties:
+      mechanics:
+        type: array
+        items:
+          $ref: "#/definitions/MechanicResponse"
+      page:
+        type: integer
+        example: 1
+      per_page:
+        type: integer
+        example: 20
+      total:
+        type: integer
+        example: 50
+      pages:
+        type: integer
+        example: 3
+
+  MechanicDeletionResponse:
+    type: object
+    properties:
+      message:
+        type: string
+        example: "Mechanic deleted successfully"
+
+  # ------ Inventory --------
+  InventoryCreate:
+    type: object
+    required: [part_name, part_number, quantity, price]
+    properties:
+      part_name:
+        type: string
+        example: "Brake Pad"
+      part_number:
+        type: string
+        example: "BR-321"
+      quantity:
+        type: integer
+        example: 50
+      price:
+        type: number
+        format: float
+        example: 79.99
+
+  InventoryResponse:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1001
+      part_name:
+        type: string
+        example: "Brake Pad"
+      part_number:
+        type: string
+        example: "BR-321"
+      quantity:
+        type: integer
+        example: 50
+      price:
+        type: number
+        format: float
+        example: 79.99
+
+  InventoryErrorResponse:
+    type: object
+    properties:
+      error:
+        type: string
+        example: "Part number already exists"
+      message:
+        type: string
+        example: "Invalid input or duplicate part number"
+      status_code:
+        type: integer
+        example: 400
+
+  InventoryPaginated:
+    type: object
+    required: [inventory_items, page, per_page, total, pages]
+    properties:
+      inventory_items:
+        type: array
+        items:
+          $ref: "#/definitions/InventoryResponse"
+      page:
+        type: integer
+        example: 1
+      per_page:
+        type: integer
+        example: 20
+      total:
+        type: integer
+        example: 100
+      pages:
+        type: integer
+        example: 5
+  
+  InventoryNotFoundErrorResponse:
+    type: object
+    properties:
+      error:
+        type: string
+        example: "Inventory item not found"
+  
+  InventoryDeletionResponse:
+    type: object
+    properties:
+      message:
+        type: string
+        example: "Inventory item deleted successfully"
+
+  # ------ Service Tickets --------
+  ServiceTicketCreate:
+    type: object
+    required: [customer_id, mechanic_id, status, description]
+    properties:
+      customer_id:
+        type: integer
+        example: 101
+      mechanic_id:
+        type: integer
+        example: 1
+      status:
+        type: string
+        enum: ["open", "in_progress", "closed"]
+        example: "open"
+      description:
+        type: string
+        example: "Brake pad replacement needed"
+        
+  ServiceTicketResponse:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+      customer_id:
+        type: integer
+        example: 101
+      mechanic_id:
+        type: integer
+        example: 1
+      status:
+        type: string
+        enum: ["open", "in_progress", "closed"]
+        example: "open"
+      description:
+        type: string
+        example: "Brake pad replacement needed"
+
+  ServiceTicketMechanicEdit:
+    type: object
+    properties:
+      add_mechanic_ids:
+        type: array
+        items:
+          type: integer
+        example: [2]
+      remove_mechanic_ids:
+        type: array
+        items:
+          type: integer
+        example: [1]
+    required: []
+    description: "Optional arrays of mechanic IDs to add or remove from the ticket"
+
+  ServiceTicketErrorResponse:
+    type: object
+    properties:
+      error:
+        type: string
+        example: "Invalid input or customer/mechanic not found"
+      message:
+        type: string
+        example: "Detailed error message"
+      status_code:
+        type: integer
+        example: 400
+
+  ServiceTicketNotFoundErrorResponse:
+    type: object
+    properties:
+      error:
+        type: string
+        example: "Service ticket not found"
+      message:
+        type: string
+        example: "The requested service ticket does not exist"
+      status_code:
+        type: integer
+        example: 404
+
+
+  PaginatedServiceTicketsResponse:
+    type: object
+    required: [service_tickets, page, per_page, total, pages]
+    properties:
+      service_tickets:
+        type: array
+        items:
+          $ref: "#/definitions/ServiceTicketResponse"
+      page:
+        type: integer
+        example: 1
+      per_page:
+        type: integer
+        example: 20
+      total:
+        type: integer
+        example: 100
+      pages:
+        type: integer
+        example: 5
+
+  ServiceTicketPartsResponse:
+    type: object
+    properties:
+      Service ticket ID:
+        type: integer
+        example: 12
+      Parts:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 4
+            part_name:
+              type: string
+              example: "Brake Pad"
+            quantity:
+              type: integer
+              example: 2
+
+
+  # ------ Error Responses --------
+  PaginatedErrorResponse:
+    type: object
+    properties:
+      error:
+        type: string
+        example: "Invalid request parameters"
+      details:
+        type: array
+        items:
+          type: string
+        example: ["Page must be a positive integer", "Limit must be between 1 and 100"]
+
+  UnauthorizedErrorResponse:
+    type: object
+    properties:
+      error:
+        type: string
+        example: "Unauthorized access"
+      message:
+        type: string
+        example: "You do not have permission to access this resource"
+      status_code:
+        type: integer
+        example: 403
+
+  ErrorResponse:
+    type: object
+    properties:
+      error:
+        type: string
+        example: "An unexpected error occurred"
+      message:
+        type: string
+        example: "Detailed error message"
+      status_code:
+        type: integer
+        example: 500
