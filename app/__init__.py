@@ -9,23 +9,31 @@ from dotenv import load_dotenv
 from .blueprints.auth import auth_bp
 from flask_swagger_ui import get_swaggerui_blueprint
 from flask_cors import CORS
+from config import DevelopmentConfig, TestingConfig, ProductionConfig
+
+
+config_map = {
+    'DevelopmentConfig': DevelopmentConfig,
+    'TestingConfig': TestingConfig,
+    'ProductionConfig': ProductionConfig
+}
 
 load_dotenv()
 
 
 def create_app(config_name):
     app = Flask(__name__)
-    app.config.from_object(f'config.{config_name}')
+    app.config.from_object(config_map[config_name])
 
     # Enable CORS for all routes
     CORS(app)
 
-    #initialize extensions
+    # initialize extensions
     ma.init_app(app)
     db.init_app(app)
     limiter.init_app(app)
     cache.init_app(app)
-    
+
     # Swagger UI setup
     SWAGGER_URL = '/api/docs'
     API_URL = '/static/swagger.yaml'
@@ -37,7 +45,7 @@ def create_app(config_name):
         }
     )
 
-    #register Blueprints
+    # register Blueprints
     app.register_blueprint(customers_bp, url_prefix='/customers')
     app.register_blueprint(mechanics_bp, url_prefix='/mechanics')
     app.register_blueprint(service_tickets_bp, url_prefix='/service_tickets')

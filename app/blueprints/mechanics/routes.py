@@ -8,6 +8,8 @@ from . import mechanics_bp
 from app.extensions import limiter, cache
 
 # Create a mechanic
+
+
 @mechanics_bp.route('/', methods=['POST'])
 @limiter.limit("5 per minute; 50 per day")
 def create_mechanic():
@@ -20,7 +22,7 @@ def create_mechanic():
     existing_mechanic = db.session.execute(query).scalars().all()
     if existing_mechanic:
         return jsonify({'error': 'Mechanic already exists'}), 400
-    
+
     hashed_password = Mechanic.hash_password(mechanic_data['password'])
     mechanic_data['password'] = hashed_password
 
@@ -30,7 +32,7 @@ def create_mechanic():
     return mechanic_schema.jsonify(new_mechanic), 201
 
 
-#Get all mechanics (RBAC: Mechanic only)
+# Get all mechanics (RBAC: Mechanic only)
 @mechanics_bp.route('/', methods=['GET'])
 @token_required
 @cache.cached(timeout=30)
@@ -50,12 +52,12 @@ def get_mechanics(current_user_id, current_user_role):
 
     if not mechanics:
         return jsonify({'message': 'No mechanics found'}), 404
-    
+
     if current_user_role == 'mechanic':
-        mechanics = mechanic_customer_view_schema.dump(mechanics, many=True)
+        mechanics = mechanic_customer_view_schema_many.dump(mechanics)
     elif current_user_role == 'customer':
-        mechanics = mechanic_customer_view_schema.dump(mechanics, many=True)
-    else: 
+        mechanics = mechanic_customer_view_schema_many.dump(mechanics)
+    else:
         return jsonify({'error': 'Access denied'}), 403
 
     return jsonify({
@@ -68,7 +70,7 @@ def get_mechanics(current_user_id, current_user_role):
     }), 200
 
 
-#Get a mechanic by ID (RBAC: Mechanic only)
+# Get a mechanic by ID (RBAC: Mechanic only)
 @mechanics_bp.route('/<int:mechanic_id>', methods=['GET'])
 @token_required
 @cache.cached(timeout=30)
@@ -87,12 +89,11 @@ def get_mechanic_by_id(current_user_id, mechanic_id, current_user_role):
         return jsonify({'error': 'Access denied'}), 403
 
 
-
-#Update a mechanic
+# Update a mechanic
 @mechanics_bp.route('/<int:mechanic_id>', methods=['PUT'])
 @mechanic_required
 @limiter.limit('5 per minute; 50 per day')
-def update_mechanic(current_user_id, mechanic_id):
+def update_mechanic(current_user_id, current_user_role, mechanic_id):
     mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:
         return jsonify({'error': 'Mechanic not found'}), 404
@@ -108,11 +109,11 @@ def update_mechanic(current_user_id, mechanic_id):
     return mechanic_schema.jsonify(mechanic), 200
 
 
-#Partial update a mechanic (RBAC: Mechanic only)
+# Partial update a mechanic (RBAC: Mechanic only)
 @mechanics_bp.route('/<int:mechanic_id>', methods=['PATCH'])
 @mechanic_required
 @limiter.limit('5 per minute; 50 per day')
-def partial_update_mechanic(current_user_id,mechanic_id):
+def partial_update_mechanic(current_user_id, current_user_role, mechanic_id):
     mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:
         return jsonify({'error': 'Mechanic not found'}), 404
@@ -125,11 +126,13 @@ def partial_update_mechanic(current_user_id,mechanic_id):
     db.session.commit()
     return mechanic_schema.jsonify(mechanic), 200
 
-#Delete a mechanic (RBAC: Mechanic only)
+# Delete a mechanic (RBAC: Mechanic only)
+
+
 @mechanics_bp.route('/<int:mechanic_id>', methods=['DELETE'])
 @mechanic_required
 @limiter.limit('5 per minute; 50 per day')
-def delete_mechanic(current_user_id, mechanic_id):
+def delete_mechanic(current_user_id, current_user_role, mechanic_id):
     mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:
         return jsonify({'error': 'Mechanic not found'}), 404
@@ -150,25 +153,27 @@ def get_popular_mechanics(current_user_id, current_user_role):
     mechanics.sort(key=lambda m: len(m.service_tickets), reverse=True)
 
     if current_user_role == 'mechanic':
-        return mechanic_schema.jsonify(mechanics), 200
+        return jsonify(mechanics_schema.dump(mechanics)), 200
     elif current_user_role == 'customer':
-        mechanic_data = mechanic_customer_view_schema.dump(mechanics, many=True)
+        mechanic_data = mechanic_customer_view_schema.dump(
+            mechanics, many=True)
         return jsonify(mechanic_data), 200
     else:
-
         return jsonify({'error': 'Access denied'}), 403
 
 # Get mechanics by name or email
+
+
 @mechanics_bp.route('/search', methods=['GET'])
 @token_required
 def search_mechanics(current_user_id, current_user_role):
     name = request.args.get('name')
     email = request.args.get('email')
     query = select(Mechanic)
-    
+
     if not name and not email:
-        return({'error': 'Most provide a search parameter(name or email)'}), 400
-    
+        return ({'error': 'Most provide a search parameter(name or email)'}), 400
+
     if name:
         query = query.where(Mechanic.name.ilike(f'%{name}%'))
     if email:
@@ -177,9 +182,9 @@ def search_mechanics(current_user_id, current_user_role):
     mechanics = db.session.execute(query).scalars().all()
 
     if current_user_role == 'mechanic':
-        mechanics = mechanics_schema.dump(mechanics)
+        return jsonify(mechanics_schema.dump(mechanics)), 200
     elif current_user_role == 'customer':
-        mechanics = mechanic_customer_view_schema.dump(mechanics, many=True)
+        return jsonify(mechanic_customer_view_schema.dump(mechanics)), 200
     else:
         return jsonify({'error': 'Must be logged in to search mechanics'}), 403
 

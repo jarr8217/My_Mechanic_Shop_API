@@ -7,7 +7,7 @@ from sqlalchemy import select
 from app import db
 from . import auth_bp
 
-
+# Customer login
 @auth_bp.route('/login', methods=['POST'])
 def login():
     try:
@@ -28,6 +28,7 @@ def login():
     token = encode_token(customer.id)
 
     return jsonify({
+        'status': 'Login successful',
         'token': token,
         'user': {
             'id': customer.id,
@@ -36,7 +37,7 @@ def login():
         }
     }), 200
 
-# Mechanic login route
+# Mechanic login
 @auth_bp.route('/mechanic_login', methods=['POST'])
 def mechanic_login():
     try:

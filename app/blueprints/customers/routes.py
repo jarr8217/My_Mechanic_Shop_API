@@ -37,7 +37,7 @@ def create_customer():
 
 # Get all customers (RBAC: Mechanic only)
 @customers_bp.route('/', methods=['GET'])
-@token_required
+@mechanic_required
 @cache.cached(timeout=30)
 def get_customers(current_user_id, current_user_role):
     page = int(request.args.get('page', 1))
@@ -55,7 +55,7 @@ def get_customers(current_user_id, current_user_role):
         "pages": pagination.pages
     }), 200
 
-# Get a customer by ID (RBAC: Mechanic and Customer can access their own data)
+# Get a customer by ID (RBAC: Mechanic and Customer can only access their own data)
 @customers_bp.route('/<int:customer_id>', methods=['GET'])
 @token_required
 @cache.cached(timeout=30)
@@ -133,7 +133,7 @@ def delete_customer(current_user_id, customer_id, current_user_role):
 
 # Get customers by search criteria (name or email)
 @customers_bp.route('/search', methods=['GET'])
-@token_required
+@mechanic_required
 def search_customers(current_user_id, current_user_role):
     name = request.args.get('name')
     email = request.args.get('email')
@@ -146,10 +146,14 @@ def search_customers(current_user_id, current_user_role):
     if not name and not email:
         return jsonify({'message': 'Please provide at least one search criteria (name or email)'}), 400
 
+    if current_user_role != 'mechanic':
+        return jsonify({'message': 'Unauthorized access'}), 403
+
     customers = db.session.execute(query).scalars().all()
     if not customers:
         return jsonify({'message': 'No customers found matching the criteria'}), 404
     
+
     return customer_schema.jsonify(customers, many=True), 200
 
 

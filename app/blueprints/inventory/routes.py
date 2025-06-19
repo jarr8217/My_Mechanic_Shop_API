@@ -8,7 +8,6 @@ from app.extensions import limiter, cache
 from app.utils.decorators import mechanic_required, token_required, customer_required
 
 
-
 # Create a new inventory item (RBAC: Mechanic only)
 @inventory_bp.route('/', methods=['POST'])
 @mechanic_required
@@ -18,7 +17,8 @@ def create_inventory_item(current_user_id, current_user_role):
     except ValidationError as e:
         return jsonify(e.messages), 400
 
-    query = select(Inventory).where(Inventory.part_number == inventory_data['part_number'])
+    query = select(Inventory).where(
+        Inventory.part_number == inventory_data['part_number'])
     existing_inventory_item = db.session.execute(query).scalars().all()
     if existing_inventory_item:
         return jsonify({'error': "Part number already exists"}), 400
@@ -34,6 +34,8 @@ def create_inventory_item(current_user_id, current_user_role):
     return inventory_schema.jsonify(new_inventory_item), 201
 
 # Get all inventory items (Open to all)
+
+
 @inventory_bp.route('/', methods=['GET'])
 @cache.cached(timeout=30)
 def get_inventory_items():
@@ -53,6 +55,8 @@ def get_inventory_items():
     }), 200
 
 # Get an inventory item by ID (Open to all)
+
+
 @inventory_bp.route('/<int:inventory_item_id>', methods=['GET'])
 @cache.cached(timeout=60)
 def get_inventory_item(inventory_item_id):
@@ -62,6 +66,8 @@ def get_inventory_item(inventory_item_id):
     return inventory_schema.jsonify(inventory_item), 200
 
 # Update an inventory item (RBAC: Mechanic only)
+
+
 @inventory_bp.route('/<int:inventory_item_id>', methods=['PUT'])
 @mechanic_required
 @limiter.limit('5 per minute; 50 per day')
@@ -81,7 +87,8 @@ def update_inventory_item(current_user_id, current_user_role, inventory_item_id)
     return inventory_schema.jsonify(inventory_item), 200
 
 # Partial update an inventory item (RBAC: Mechanic only)
-@inventory_bp.route('/<int:inventory_item_id>/partial', methods=['PATCH'])
+
+
 @inventory_bp.route('/<int:inventory_item_id>', methods=['PATCH'])
 @mechanic_required
 @limiter.limit('5 per minute; 50 per day')
@@ -101,6 +108,8 @@ def partial_update_inventory_item(current_user_id, current_user_role, inventory_
     return jsonify(inventory_schema.dump(inventory_item)), 200
 
 # Delete an inventory item (RBAC: Mechanic can delete inventory items)
+
+
 @inventory_bp.route('/<int:inventory_item_id>', methods=['DELETE'])
 @mechanic_required
 @limiter.limit('5 per minute; 50 per day')
