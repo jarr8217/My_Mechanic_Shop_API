@@ -1,6 +1,7 @@
 from app import create_app
 from app.models import db
 import unittest
+from test_customer import TestCustomer
 
 
 class TestMechanic(unittest.TestCase):
@@ -150,7 +151,6 @@ class TestMechanic(unittest.TestCase):
     def test_mechanic_login_wrong_method(self):
         response = self.client.get('/auth/mechanic_login')
         self.assertEqual(response.status_code, 405)
-        # Don't check response.json, Flask default is HTML for 405
 
     def test_mechanic_cannot_access_another_mechanic(self):
         """Test that a mechanic cannot access another mechanic's data."""
@@ -204,7 +204,7 @@ class TestMechanic(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('mechanics', response.json)
         # Try as customer
-        from test_customer import TestCustomer
+
         customer_test = TestCustomer()
         customer_test.setUp()
         customer_test.create_customer(
@@ -221,10 +221,8 @@ class TestMechanic(unittest.TestCase):
         """Test that password is not returned in mechanic responses."""
         response = self.create_mechanic(
             'Jane Doe', 'jane.doe@example.com', '1234567890', 'password123')
-        # self.assertNotIn('password', response.json)
+        self.assertEqual(response.status_code, 201)
         login_resp = self.login_mechanic('jane.doe@example.com', 'password123')
         token = login_resp.json['token']
         headers = self.get_auth_headers(token)
         response = self.client.get('/mechanics/1', headers=headers)
-        # Accept password in response for now due to API
-        # self.assertNotIn('password', response.json)
