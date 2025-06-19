@@ -1,7 +1,6 @@
 from app import create_app
 from app.models import db
 import unittest
-from test_auth import TestAuth
 
 
 class TestCustomer(unittest.TestCase):
@@ -465,3 +464,7 @@ class TestCustomer(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertIn('error', response.json)
         self.assertEqual(response.json['error'], 'Customer not found')
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -177,3 +177,7 @@ class TestAuth(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
         self.assertIn('error', response.json)
         self.assertEqual(response.json['error'], 'Invalid token!')
+
+
+if __name__ == '__main__':
+    unittest.main()

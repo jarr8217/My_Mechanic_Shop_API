@@ -16,6 +16,9 @@ def create_inventory_item(current_user_id, current_user_role):
         inventory_data = inventory_schema.load(request.json)
     except ValidationError as e:
         return jsonify(e.messages), 400
+    # Negative value check
+    if inventory_data.get('quantity', 0) < 0 or inventory_data.get('price', 0) < 0:
+        return jsonify({'error': 'Quantity and price must be non-negative'}), 400
 
     query = select(Inventory).where(
         Inventory.part_number == inventory_data['part_number'])
@@ -79,6 +82,9 @@ def update_inventory_item(current_user_id, current_user_role, inventory_item_id)
         inventory_data = inventory_schema.load(request.json)
     except ValidationError as e:
         return jsonify(e.messages), 400
+    # Negative value check
+    if inventory_data.get('quantity', 0) < 0 or inventory_data.get('price', 0) < 0:
+        return jsonify({'error': 'Quantity and price must be non-negative'}), 400
 
     for key, value in inventory_data.items():
         setattr(inventory_item, key, value)
@@ -96,10 +102,18 @@ def partial_update_inventory_item(current_user_id, current_user_role, inventory_
     inventory_item = db.session.get(Inventory, inventory_item_id)
     if not inventory_item:
         return jsonify({'error': 'Inventory item not found'}), 404
+    # Empty payload check
+    if not request.json or not bool(request.json):
+        return jsonify({'error': 'No data provided for update'}), 400
     try:
         inventory_data = inventory_schema.load(request.json, partial=True)
     except ValidationError as e:
         return jsonify(e.messages), 400
+    # Negative value check (if present)
+    if 'quantity' in inventory_data and inventory_data['quantity'] < 0:
+        return jsonify({'error': 'Quantity and price must be non-negative'}), 400
+    if 'price' in inventory_data and inventory_data['price'] < 0:
+        return jsonify({'error': 'Quantity and price must be non-negative'}), 400
 
     for key, value in inventory_data.items():
         setattr(inventory_item, key, value)
