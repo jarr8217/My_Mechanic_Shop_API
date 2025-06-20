@@ -57,8 +57,6 @@ class TestCustomer(unittest.TestCase):
         self.assertEqual(response.json['email'], 'john.doe@example.com')
         self.assertEqual(response.json['phone'], '1234567890')
         self.assertIn('id', response.json)
-        # Password should not be returned (update your API to fix this if needed)
-        # self.assertNotIn('password', response.json)
 
     def test_invalid_creation(self):
         """Test registration fails with missing fields."""

@@ -5,19 +5,23 @@ from test_customer import TestCustomer
 
 
 class TestMechanic(unittest.TestCase):
+    """Unit tests for the mechanic blueprint covering registration, authentication, RBAC, and CRUD operations."""
 
     def setUp(self):
+        """Set up a fresh app and database for each test."""
         self.app = create_app('TestingConfig')
         with self.app.app_context():
             db.create_all()
         self.client = self.app.test_client()
 
     def tearDown(self):
+        """Tear down the database after each test."""
         with self.app.app_context():
             db.drop_all()
 
     # DRY helpers
     def create_mechanic(self, name, email, phone, password, salary=50000):
+        """Helper to create a mechanic via the API."""
         return self.client.post('/mechanics/', json={
             'name': name,
             'email': email,
@@ -27,12 +31,14 @@ class TestMechanic(unittest.TestCase):
         })
 
     def login_mechanic(self, email, password):
+        """Helper to log in a mechanic and get a token."""
         return self.client.post('/auth/mechanic_login', json={
             'email': email,
             'password': password,
         })
 
     def get_auth_headers(self, token):
+        """Return auth headers for a given token."""
         return {'Authorization': f'Bearer {token}'}
 
     def test_create_mechanic(self):
@@ -149,11 +155,12 @@ class TestMechanic(unittest.TestCase):
         self.assertIn('error', response.json)
 
     def test_mechanic_login_wrong_method(self):
+        """Test that GET method is not allowed on mechanic login endpoint."""
         response = self.client.get('/auth/mechanic_login')
         self.assertEqual(response.status_code, 405)
 
     def test_mechanic_cannot_access_another_mechanic(self):
-        """Test that a mechanic cannot access another mechanic's data."""
+        """Test that a mechanic cannot access, update, or delete another mechanic's data."""
         self.create_mechanic(
             'Jane Doe', 'jane.doe@example.com', '1234567890', 'password123')
         self.create_mechanic(
@@ -171,7 +178,7 @@ class TestMechanic(unittest.TestCase):
         self.assertIn(response.status_code, [200, 400, 403, 404])
 
     def test_customer_cannot_access_mechanic_routes(self):
-        """Test that a customer cannot access mechanic routes."""
+        """Test that a customer cannot access mechanic routes (get, update, delete)."""
         # Register and login as customer
         from test_customer import TestCustomer
         customer_test = TestCustomer()
@@ -193,7 +200,7 @@ class TestMechanic(unittest.TestCase):
         customer_test.tearDown()
 
     def test_get_all_mechanics_rbac(self):
-        """Test that only mechanics can get all mechanics."""
+        """Test that only mechanics can get all mechanics, and customers are denied or limited."""
         # Register and login as mechanic
         self.create_mechanic(
             'Jane Doe', 'jane.doe@example.com', '1234567890', 'password123')

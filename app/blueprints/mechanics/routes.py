@@ -1,3 +1,4 @@
+"""Mechanic blueprint routes for registration, authentication, and mechanic management."""
 from app.utils.decorators import mechanic_required, token_required
 from .schemas import mechanic_schema, mechanics_schema, mechanic_customer_view_schema, mechanic_customer_view_schema_many
 from flask import request, jsonify
@@ -13,6 +14,7 @@ from app.extensions import limiter, cache
 @mechanics_bp.route('/', methods=['POST'])
 @limiter.limit("5 per minute; 50 per day")
 def create_mechanic():
+    """Create a new mechanic account."""
     try:
         mechanic_data = mechanic_schema.load(request.json)
     except ValidationError as e:
@@ -37,6 +39,7 @@ def create_mechanic():
 @token_required
 @cache.cached(timeout=30)
 def get_mechanics(current_user_id, current_user_role):
+    """Get a paginated list of mechanics."""
     try:
         page = int(request.args.get('page', 1))
         per_page = int(request.args.get('per_page', 20))
@@ -75,6 +78,7 @@ def get_mechanics(current_user_id, current_user_role):
 @token_required
 @cache.cached(timeout=30)
 def get_mechanic_by_id(current_user_id, mechanic_id, current_user_role):
+    """Get mechanic details by ID."""
     mechanic = db.session.get(Mechanic, mechanic_id)
 
     if not mechanic:
@@ -94,6 +98,7 @@ def get_mechanic_by_id(current_user_id, mechanic_id, current_user_role):
 @mechanic_required
 @limiter.limit('5 per minute; 50 per day')
 def update_mechanic(current_user_id, current_user_role, mechanic_id):
+    """Update mechanic details."""
     mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:
         return jsonify({'error': 'Mechanic not found'}), 404
@@ -114,6 +119,7 @@ def update_mechanic(current_user_id, current_user_role, mechanic_id):
 @mechanic_required
 @limiter.limit('5 per minute; 50 per day')
 def partial_update_mechanic(current_user_id, current_user_role, mechanic_id):
+    """Partially update mechanic details."""
     mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:
         return jsonify({'error': 'Mechanic not found'}), 404
@@ -133,6 +139,7 @@ def partial_update_mechanic(current_user_id, current_user_role, mechanic_id):
 @mechanic_required
 @limiter.limit('5 per minute; 50 per day')
 def delete_mechanic(current_user_id, current_user_role, mechanic_id):
+    """Delete a mechanic by ID."""
     mechanic = db.session.get(Mechanic, mechanic_id)
     if not mechanic:
         return jsonify({'error': 'Mechanic not found'}), 404
@@ -147,6 +154,7 @@ def delete_mechanic(current_user_id, current_user_role, mechanic_id):
 @token_required
 @cache.cached(timeout=60)
 def get_popular_mechanics(current_user_id, current_user_role):
+    """Get mechanics sorted by the number of service tickets."""
     query = select(Mechanic)
     mechanics = db.session.execute(query).scalars().all()
 
@@ -167,6 +175,7 @@ def get_popular_mechanics(current_user_id, current_user_role):
 @mechanics_bp.route('/search', methods=['GET'])
 @token_required
 def search_mechanics(current_user_id, current_user_role):
+    """Search mechanics by name or email."""
     name = request.args.get('name')
     email = request.args.get('email')
     query = select(Mechanic)

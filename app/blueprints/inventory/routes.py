@@ -1,3 +1,5 @@
+"""Inventory blueprint routes for part management (CRUD)."""
+
 from .schemas import inventory_schema, inventories_schema
 from flask import request, jsonify
 from marshmallow import ValidationError
@@ -12,6 +14,7 @@ from app.utils.decorators import mechanic_required, token_required, customer_req
 @inventory_bp.route('/', methods=['POST'])
 @mechanic_required
 def create_inventory_item(current_user_id, current_user_role):
+    """Create a new inventory item."""
     try:
         inventory_data = inventory_schema.load(request.json)
     except ValidationError as e:
@@ -42,6 +45,7 @@ def create_inventory_item(current_user_id, current_user_role):
 @inventory_bp.route('/', methods=['GET'])
 @cache.cached(timeout=30)
 def get_inventory_items():
+    """Retrieve all inventory items with pagination."""
     page = int(request.args.get('page', 1))
     limit = int(request.args.get('limit', 20))
     query = select(Inventory)
@@ -63,6 +67,7 @@ def get_inventory_items():
 @inventory_bp.route('/<int:inventory_item_id>', methods=['GET'])
 @cache.cached(timeout=60)
 def get_inventory_item(inventory_item_id):
+    """Retrieve a specific inventory item by its ID."""
     inventory_item = db.session.get(Inventory, inventory_item_id)
     if not inventory_item:
         return jsonify({'error': 'Inventory item not found'}), 404
@@ -75,6 +80,7 @@ def get_inventory_item(inventory_item_id):
 @mechanic_required
 @limiter.limit('5 per minute; 50 per day')
 def update_inventory_item(current_user_id, current_user_role, inventory_item_id):
+    """Update an existing inventory item."""
     inventory_item = db.session.get(Inventory, inventory_item_id)
     if not inventory_item:
         return jsonify({'error': 'Inventory item not found'}), 404
@@ -99,6 +105,7 @@ def update_inventory_item(current_user_id, current_user_role, inventory_item_id)
 @mechanic_required
 @limiter.limit('5 per minute; 50 per day')
 def partial_update_inventory_item(current_user_id, current_user_role, inventory_item_id):
+    """Partially update an existing inventory item."""
     inventory_item = db.session.get(Inventory, inventory_item_id)
     if not inventory_item:
         return jsonify({'error': 'Inventory item not found'}), 404
@@ -128,6 +135,7 @@ def partial_update_inventory_item(current_user_id, current_user_role, inventory_
 @mechanic_required
 @limiter.limit('5 per minute; 50 per day')
 def delete_inventory_item(current_user_id, current_user_role, inventory_item_id):
+    """Delete an inventory item."""
     inventory_item = db.session.get(Inventory, inventory_item_id)
     if not inventory_item:
         return jsonify({'error': 'Inventory item not found'}), 404

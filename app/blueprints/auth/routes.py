@@ -1,3 +1,5 @@
+"""Authentication blueprint routes for customer and mechanic login."""
+
 from flask import request, jsonify
 from marshmallow import ValidationError
 from werkzeug.security import check_password_hash
@@ -8,8 +10,11 @@ from app import db
 from . import auth_bp
 
 # Customer login
+
+
 @auth_bp.route('/login', methods=['POST'])
 def login():
+    """Authenticate customer and return JWT token."""
     try:
         credentials = request.json
         email = credentials.get('email')
@@ -20,7 +25,8 @@ def login():
     if not email or not password:
         return jsonify({'error': 'Email and password are required'}), 400
 
-    customer = db.session.execute(select(Customer).where(Customer.email == email)).scalars().first()
+    customer = db.session.execute(select(Customer).where(
+        Customer.email == email)).scalars().first()
 
     if not customer or not check_password_hash(customer.password, password):
         return jsonify({'error': 'Invalid email or password'}), 400
@@ -38,8 +44,11 @@ def login():
     }), 200
 
 # Mechanic login
+
+
 @auth_bp.route('/mechanic_login', methods=['POST'])
 def mechanic_login():
+    """Authenticate mechanic and return JWT token."""
     try:
         credentials = request.json
         email = credentials.get('email')
@@ -49,9 +58,10 @@ def mechanic_login():
 
     if not email or not password:
         return jsonify({'error': 'Email and password are required'}), 400
-    
-    mechanic = db.session.execute(select(Mechanic).where(Mechanic.email == email)).scalars().first() 
-    
+
+    mechanic = db.session.execute(select(Mechanic).where(
+        Mechanic.email == email)).scalars().first()
+
     if not mechanic or not check_password_hash(mechanic.password, password):
         return jsonify({'error': 'Invalid email or password'}), 400
 

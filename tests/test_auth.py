@@ -84,7 +84,7 @@ class TestAuth(unittest.TestCase):
             'email': 'not.a.mechanic@example.com',
             'password': 'wrongpassword',
         })
-        self.assertEqual(response.status_code, 400)  # Accept 400 as per API
+        self.assertEqual(response.status_code, 400)
         self.assertIn('error', response.json)
 
     def test_login_missing_fields(self):
@@ -120,12 +120,10 @@ class TestAuth(unittest.TestCase):
     def test_login_wrong_method(self):
         response = self.client.get('/auth/login')
         self.assertEqual(response.status_code, 405)
-        # Don't check response.json, Flask default is HTML for 405
 
     def test_mechanic_login_wrong_method(self):
         response = self.client.get('/auth/mechanic_login')
         self.assertEqual(response.status_code, 405)
-        # Don't check response.json, Flask default is HTML for 405
 
     def test_protected_route_with_token(self):
         """Test that a mechanic can access a protected route with a valid token."""

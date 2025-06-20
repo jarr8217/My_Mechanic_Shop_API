@@ -213,7 +213,7 @@ class TestServiceTicket(unittest.TestCase):
         carl_id = 2
         cust_id = 1
         self.create_ticket(mech_token, cust_id, vin='VINEDIT1')
-        # Add Carl as mechanic
+
         edit_payload = {'add_mechanic_ids': [
             carl_id], 'remove_mechanic_ids': []}
         resp = self.client.put('/service_tickets/edit/1', json=edit_payload,
@@ -326,12 +326,9 @@ class TestServiceTicket(unittest.TestCase):
         part_id = inv_resp.json['id']
         self.client.put(f'/service_tickets/1/add_part/{part_id}', json={
                         'quantity': 1}, headers=self.get_auth_headers(mech_token))
-        # Mechanic can list
         resp = self.client.get('/service_tickets1/parts',
                                headers=self.get_auth_headers(mech_token))
-        # Accept 404 if typo in route
         self.assertIn(resp.status_code, (200, 404))
-        # Customer can list
         resp2 = self.client.get('/service_tickets1/parts',
                                 headers=self.get_auth_headers(cust_token))
         self.assertIn(resp2.status_code, (200, 404))

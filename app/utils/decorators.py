@@ -1,3 +1,5 @@
+"""Custom decorators for authentication and role-based access control."""
+
 from functools import wraps
 from flask import request, jsonify
 import jwt
@@ -6,6 +8,7 @@ from .util import SECRET_KEY, ALGORITHM
 
 
 def token_required(f):
+    """Decorator to require a valid token for accessing the endpoint."""
     @wraps(f)
     def decorated(*args, **kwargs):
         token = None
@@ -32,7 +35,9 @@ def token_required(f):
         return f(current_user_id, *args, current_user_role=current_user_role, **kwargs)
     return decorated
 
+
 def mechanic_required(f):
+    """Decorator to require mechanic role for accessing the endpoint."""
     @wraps(f)
     def decorated(*args, **kwargs):
         token = None
@@ -57,7 +62,9 @@ def mechanic_required(f):
         return f(current_user_id, current_user_role, *args, **kwargs)
     return decorated
 
+
 def customer_required(f):
+    """Decorator to require customer role for accessing the endpoint."""
     @wraps(f)
     def decorated(*args, **kwargs):
         token = None
