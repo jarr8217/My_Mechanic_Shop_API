@@ -61,6 +61,33 @@ python app.py
 - **Service Tickets**: `/service_tickets/` (CRUD, assign/remove mechanics, add/remove parts)
 - **Inventory**: `/inventory/` (CRUD)
 
+## API Documentation
+
+- **Interactive Docs:**  
+  The API is fully documented using Swagger/OpenAPI.
+  - Visit [`/swagger`](http://localhost:5000/swagger) or [`/docs`](http://localhost:5000/docs) after running the app to view and interact with the API documentation.
+  - Every route includes path, method, parameters, request/response examples, and security requirements.
+
+- **Spec File:**  
+  The OpenAPI/Swagger spec is located at `app/static/swagger.yaml`.
+
+## Automated Testing
+
+- **Test Suite:**  
+  All endpoints are covered by automated tests using Python’s `unittest` framework.
+  - Tests are located in the `tests/` directory, with a separate file for each blueprint.
+  - Both positive and negative cases are tested, including authentication, RBAC, and edge cases.
+
+- **How to Run Tests:**  
+  ```sh
+  python -m unittest discover -v
+  ```
+  or simply
+  ```sh
+  python -m unittest
+  ```
+  from the project root.
+
 ## Security & Best Practices
 - All sensitive routes are protected by JWT authentication and RBAC decorators.
 - Rate limiting and caching are applied for security and performance.

@@ -7,7 +7,7 @@ from sqlalchemy import select
 from app.models import Inventory, db
 from . import inventory_bp
 from app.extensions import limiter, cache
-from app.utils.decorators import mechanic_required, token_required, customer_required
+from app.utils.decorators import mechanic_required
 
 
 # Create a new inventory item (RBAC: Mechanic only)
