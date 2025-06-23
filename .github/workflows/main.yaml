@@ -22,21 +22,26 @@ jobs:
       - name: Create virtual environment
         run: |
           python -m venv venv
-          source venv/bin/activate
 
       - name: Install dependencies
         run: |
           ./venv/bin/pip install --upgrade pip
           ./venv/bin/pip install -r requirements.txt
 
+      - name: Show installed packages
+        run: |
+          ./venv/bin/pip freeze
+
       - name: Print debugging information
         run: |
-          echo "Python Version: $(python --version)"
+          echo "Python Version: $(./venv/bin/python --version)"
           echo "Working Directory: $(pwd)"
           echo "Contents of Working Directory: $(ls -l)"
           echo "Contents of site-packages: $(ls -l venv/lib/python*/site-packages)"
 
       - name: Run tests
+        env:
+          FLASK_ENV: testing
+          SECRET_KEY: dev_secret_key
         run: |
           ./venv/bin/python -m unittest discover -s tests -p 'test_*.py'
-          
