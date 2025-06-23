@@ -2,7 +2,7 @@ import os
 
 
 class Config:
-    SECRET_KEY = str(os.environ.get('SECRET_KEY'))
+    SECRET_KEY = str(os.environ.get('SECRET_KEY', 'dev_secret_key'))  # Default for tests/dev
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
