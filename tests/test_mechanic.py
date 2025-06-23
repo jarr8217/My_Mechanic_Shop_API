@@ -233,3 +233,7 @@ class TestMechanic(unittest.TestCase):
         token = login_resp.json['token']
         headers = self.get_auth_headers(token)
         response = self.client.get('/mechanics/1', headers=headers)
+
+
+if __name__ == '__main__':
+    unittest.main()
