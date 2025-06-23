@@ -1,4 +1,3 @@
-"""Customer blueprint routes for registration, retrieval, update, and search."""
 from .schemas import customer_schema, customers_schema
 from flask import request, jsonify
 from marshmallow import ValidationError
@@ -13,7 +12,6 @@ from werkzeug.security import generate_password_hash
 # Create a new customer (open to all)
 @customers_bp.route('/', methods=['POST'])
 def create_customer():
-    """Create a new customer account."""
     data = request.json or {}
     required_fields = ['name', 'email', 'phone', 'password']
     if any(data.get(field) in [None, ''] for field in required_fields):
@@ -43,7 +41,6 @@ def create_customer():
 @mechanic_required
 @cache.cached(timeout=30)
 def get_customers(current_user_id, current_user_role):
-    """Retrieve a paginated list of customers (Mechanic role only)."""
     page = int(request.args.get('page', 1))
     limit = int(request.args.get('limit', 20))
     query = select(Customer)
@@ -66,7 +63,6 @@ def get_customers(current_user_id, current_user_role):
 @token_required
 @cache.cached(timeout=30)
 def get_customer(current_user_id, customer_id, current_user_role):
-    """Get customer details by ID (self or mechanic access)."""
     customer = db.session.get(Customer, customer_id)
     if not customer:
         return jsonify({'error': 'Customer not found'}), 404
@@ -83,7 +79,6 @@ def get_customer(current_user_id, customer_id, current_user_role):
 @customer_required
 @limiter.limit('5 per minute; 50 per day')
 def update_customer(current_user_id, customer_id, current_user_role):
-    """Update customer details (self only)."""
     customer = db.session.get(Customer, customer_id)
     if not customer:
         return jsonify({'error': 'Customer not found'}), 404
@@ -108,7 +103,6 @@ def update_customer(current_user_id, customer_id, current_user_role):
 @customer_required
 @limiter.limit('5 per minute; 50 per day')
 def partial_update_customer(current_user_id, customer_id, current_user_role):
-    """Partially update customer details (self only)."""
     customer = db.session.get(Customer, customer_id)
     if not customer:
         return jsonify({'error': 'Customer not found'}), 404
@@ -132,7 +126,6 @@ def partial_update_customer(current_user_id, customer_id, current_user_role):
 @customer_required
 @limiter.limit('5 per minute; 50 per day')
 def delete_customer(current_user_id, customer_id, current_user_role):
-    """Delete a customer account (self only)."""
     customer = db.session.get(Customer, customer_id)
     if not customer:
         return jsonify({'error': 'Customer not found'}), 404
@@ -150,7 +143,6 @@ def delete_customer(current_user_id, customer_id, current_user_role):
 @customers_bp.route('/search', methods=['GET'])
 @mechanic_required
 def search_customers(current_user_id, current_user_role):
-    """Search for customers by name or email (Mechanic role only)."""
     name = request.args.get('name')
     email = request.args.get('email')
     query = select(Customer)
