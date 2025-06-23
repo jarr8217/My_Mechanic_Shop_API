@@ -129,11 +129,11 @@ class TestMechanic(unittest.TestCase):
     def test_invalid_mechanic_creation(self):
         """Test registration fails with missing fields."""
         invalid_payload = {
-            'name': None,
-            'email': None,
-            'phone': None,
-            'password': None,
-            'salary': None,
+            'name': '',
+            'email': '',
+            'phone': '',
+            'password': '',
+            'salary': '',  # Use '' for missing string fields, or remove if salary is numeric
         }
         response = self.client.post('/mechanics/', json=invalid_payload)
         self.assertEqual(response.status_code, 400)
