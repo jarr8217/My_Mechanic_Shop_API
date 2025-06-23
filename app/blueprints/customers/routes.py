@@ -14,18 +14,19 @@ from werkzeug.security import generate_password_hash
 @customers_bp.route('/', methods=['POST'])
 def create_customer():
     """Create a new customer account."""
+    data = request.json or {}
+    required_fields = ['name', 'email', 'phone', 'password']
+    if any(data.get(field) in [None, ''] for field in required_fields):
+        return jsonify({'error': 'Missing required fields'}), 400
     try:
-        customer_data = customer_schema.load(request.json)
+        customer_data = customer_schema.load(data)
     except ValidationError as e:
         return jsonify(e.messages), 400
-
     query = select(Customer).where(Customer.email == customer_data['email'])
     existing_customer = db.session.execute(query).scalars().all()
     if existing_customer:
         return jsonify({'error': "Email already exists"}), 400
-
     hashed_password = generate_password_hash(customer_data['password'])
-
     new_customer = Customer(
         name=customer_data['name'],
         email=customer_data['email'],
