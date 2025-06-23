@@ -61,10 +61,10 @@ class TestCustomer(unittest.TestCase):
     def test_invalid_creation(self):
         """Test registration fails with missing fields."""
         invalid_payload = {
-            'name': None,
-            'email': None,
-            'phone': None,
-            'password': None,
+            'name': '',
+            'email': '',
+            'phone': '',
+            'password': '',
         }
 
         response = self.client.post('/customers/', json=invalid_payload)
