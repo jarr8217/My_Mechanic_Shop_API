@@ -80,3 +80,7 @@ __pypackages__/
 
 # Coverage directory (if used)
 .coverage/
+
+# Environment variables
+.env
+.env.*
