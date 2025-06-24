@@ -5,20 +5,19 @@ from .blueprints.customers import customers_bp
 from .blueprints.mechanics import mechanics_bp
 from .blueprints.service_tickets import service_tickets_bp
 from .blueprints.inventory import inventory_bp
-from dotenv import load_dotenv
 from .blueprints.auth import auth_bp
 from flask_swagger_ui import get_swaggerui_blueprint
 from flask_cors import CORS
 from config import DevelopmentConfig, TestingConfig, ProductionConfig
+from dotenv import load_dotenv
 
+load_dotenv()
 
 config_map = {
     'DevelopmentConfig': DevelopmentConfig,
     'TestingConfig': TestingConfig,
     'ProductionConfig': ProductionConfig
 }
-
-load_dotenv()
 
 
 def create_app(config_name):
