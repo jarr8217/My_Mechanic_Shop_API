@@ -7,12 +7,12 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
-class DevelopmentConfig:
+class DevelopmentConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://root:root1234!@localhost:3306/mechanic_shop_db'
     DEBUG = True
 
 
-class TestingConfig:
+class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///testing.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     TESTING = True
@@ -20,6 +20,8 @@ class TestingConfig:
     CACHE_TYPE = 'SimpleCache'
 
 
-class ProductionConfig:
-    SQLALCHEMY_DATABASE_URI = str(os.environ.get('SQLALCHEMY_DATABASE_URI'))
+class ProductionConfig(Config):
+    SQLALCHEMY_DATABASE_URI = str(os.environ.get(
+        'SQLALCHEMY_DATABASE_URI', 'sqlite:///production.db'))
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    DEBUG = False

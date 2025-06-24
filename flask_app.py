@@ -2,10 +2,14 @@
 
 from app import create_app
 from app.models import db
+import os
 
-flask_app = create_app('ProductionConfig')
+# Create app instance - use environment variable or default to ProductionConfig
+config_name = os.getenv('CONFIG_NAME', 'ProductionConfig')
+app = create_app(config_name)
 
-with flask_app.app_context():
+with app.app_context():
     db.create_all()
 
-flask_app.run(debug=True)
+if __name__ == '__main__':
+    app.run(debug=True)

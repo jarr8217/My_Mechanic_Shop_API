@@ -56,10 +56,12 @@ def create_app(config_name):
     return app
 
 
-# Create app instance for Gunicorn
-config_name = os.getenv('CONFIG_NAME', 'ProductionConfig')
-app = create_app(config_name)
+# Only create app instance for production/deployment when not in testing
+if __name__ != '__main__' and not os.getenv('TESTING'):
+    # Create app instance for Gunicorn
+    config_name = os.getenv('CONFIG_NAME', 'ProductionConfig')
+    app = create_app(config_name)
 
-# Create database tables
-with app.app_context():
-    db.create_all()
+    # Create database tables
+    with app.app_context():
+        db.create_all()
