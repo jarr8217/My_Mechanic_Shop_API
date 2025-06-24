@@ -10,6 +10,7 @@ from flask_swagger_ui import get_swaggerui_blueprint
 from flask_cors import CORS
 from config import DevelopmentConfig, TestingConfig, ProductionConfig
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
 
@@ -53,3 +54,12 @@ def create_app(config_name):
     app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
     return app
+
+
+# Create app instance for Gunicorn
+config_name = os.getenv('CONFIG_NAME', 'ProductionConfig')
+app = create_app(config_name)
+
+# Create database tables
+with app.app_context():
+    db.create_all()
