@@ -3,9 +3,9 @@ info:
   title: "My Mechanic Shop API"
   description: "API for managing customers, orders, and services at mechanic shop"
   version: "1.0.0"
-host: "127.0.0.1:5000"
+host: "my-mechanic-shop-api.onrender.com"
 schemes:
-  - "http"
+  - "https"
 consumes:
   - "application/json"
 produces:

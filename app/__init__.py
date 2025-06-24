@@ -23,10 +23,13 @@ config_map = {
 
 def create_app(config_name):
     app = Flask(__name__)
-    app.config.from_object(config_map[config_name])
-
-    # Enable CORS for all routes
-    CORS(app)
+    app.config.from_object(config_map[config_name])    # Enable CORS for all routes with proper configuration
+    CORS(app, 
+         origins=["*"],  # Allow all origins for now
+         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+         allow_headers=["Content-Type", "Authorization", "Access-Control-Allow-Credentials"],
+         supports_credentials=True
+    )
 
     # initialize extensions
     ma.init_app(app)
@@ -52,6 +55,11 @@ def create_app(config_name):
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(inventory_bp, url_prefix='/inventory')
     app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
+
+    # Add a simple root route for testing
+    @app.route('/')
+    def home():
+        return {"message": "My Mechanic Shop API is running!", "status": "success"}
 
     return app
 
