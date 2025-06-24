@@ -4,7 +4,7 @@ import jwt
 import os
 
 
-SECRET_KEY = os.getenv('SECRET_KEY'), 'I am the Prince of all Saiyans!'
+SECRET_KEY = os.getenv('SECRET_KEY') or 'I am the Prince of all Saiyans!'
 ALGORITHM = 'HS256'
 
 
