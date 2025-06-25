@@ -69,7 +69,7 @@ jobs:
           ./venv/bin/pip install -r requirements.txt
 
       - name: Deploy API
-        uses: johnbeynon/render-deploy@v1
+        uses: johnbeynon/render-deploy-action@v1.0.0
         with:
           service_key: ${{ secrets.SERVICE_ID }}
           api_key: ${{ secrets.RENDER_API_KEY }}
