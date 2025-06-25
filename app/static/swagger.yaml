@@ -1634,7 +1634,7 @@ definitions:
   # ------ Mechanic --------
   Mechanic:
     type: object
-    required: [name, email, phone, password]
+    required: [name, email, phone, password, salary]
     properties:
       name:
         type: string
@@ -1649,6 +1649,10 @@ definitions:
       password:
         type: string
         example: "password123"
+      salary:
+        type: number
+        format: float
+        example: 50000
 
   MechanicResponse:
     type: object
