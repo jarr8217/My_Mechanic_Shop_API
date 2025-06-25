@@ -477,7 +477,7 @@ paths:
     post:
       tags: ["Mechanics"]
       summary: "Register a new mechanic"
-      description: "Register a new mechanic. Requires name, email, phone, and password."
+      description: "Register a new mechanic. Requires name, email, phone, password, and salary."
       parameters:
         - in: body
           name: body
@@ -485,6 +485,13 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/Mechanic"
+          examples:
+            application/json:
+              name: "Jane Doe"
+              email: "jane.doe@example.com"
+              phone: "+1234567890"
+              password: "password123"
+              salary: 50000
       responses:
         '201':
           description: "Mechanic created successfully"
