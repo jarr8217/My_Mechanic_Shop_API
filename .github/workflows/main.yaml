@@ -45,3 +45,31 @@ jobs:
           SECRET_KEY: dev_secret_key
         run: |
           ./venv/bin/python -m unittest discover -s tests -p 'test_*.py'
+
+deploy:
+  needs: test
+  runs-on: ubuntu-latest
+
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.12
+
+    - name: Create virtual environment
+      run: |
+        python -m venv venv
+
+    - name: Install dependencies
+      run: |
+        ./venv/bin/pip install --upgrade pip
+        ./venv/bin/pip install -r requirements.txt
+
+    - name: Deploy API
+      uses: johnbeynon/render-deploy@v1
+      with:
+        service_key: ${{ secrets.SERVICE_ID }}
+        api_key: ${{ secrets.RENDER_API_KEY }}

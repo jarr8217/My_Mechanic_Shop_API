@@ -23,13 +23,15 @@ config_map = {
 
 def create_app(config_name):
     app = Flask(__name__)
-    app.config.from_object(config_map[config_name])    # Enable CORS for all routes with proper configuration
-    CORS(app, 
+    # Enable CORS for all routes with proper configuration
+    app.config.from_object(config_map[config_name])
+    CORS(app,
          origins=["*"],  # Allow all origins for now
          methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-         allow_headers=["Content-Type", "Authorization", "Access-Control-Allow-Credentials"],
+         allow_headers=["Content-Type", "Authorization",
+                        "Access-Control-Allow-Credentials"],
          supports_credentials=True
-    )
+         )
 
     # initialize extensions
     ma.init_app(app)
