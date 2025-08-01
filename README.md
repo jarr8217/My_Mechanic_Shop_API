@@ -98,7 +98,7 @@ python flask_app.py
 
 ## Production Deployment
 
-This application is configured for deployment on [Render]([https://my-mechanic-shop-api.onrender.com/api/docs/]) with the following features:
+This application is configured for deployment on [Render](https://my-mechanic-shop-api.onrender.com/api/docs/) with the following features:
 
 ### Live API
 - **Production URL**: `https://my-mechanic-shop-api.onrender.com`
