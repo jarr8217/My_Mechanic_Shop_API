@@ -1,6 +1,6 @@
 # Mechanic Shop API
 
-This is a RESTful API for a Mechanic Shop, built with Flask, SQLAlchemy, Marshmallow, a## Automated Testing
+This is a RESTful API for a Mechanic Shop, built with Flask, SQLAlchemy, Marshmallow, and Automated Testing
 
 - **Test Suite:**  
   All endpoints are covered by automated tests using Python's `unittest` framework.
